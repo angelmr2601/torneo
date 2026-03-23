@@ -4,12 +4,18 @@ let goles = {};
 let contra = {};
 let enfrentamientos = {};
 let ronda = 0;
+let partidosActuales = [];
 
 function crearTorneo() {
   jugadores = document.getElementById("playersInput").value
     .split("\n")
     .map(j => j.trim())
     .filter(j => j);
+
+  if (jugadores.length % 2 !== 0) {
+    alert("Debe haber número par de jugadores");
+    return;
+  }
 
   jugadores.forEach(j => {
     puntos[j] = 0;
@@ -25,8 +31,10 @@ function crearTorneo() {
 function generarRonda() {
   ronda++;
 
+  document.getElementById("roundTitle").innerText = "Ronda " + ronda;
+
   let disponibles = [...jugadores].sort((a, b) => puntos[b] - puntos[a]);
-  let emparejamientos = [];
+  partidosActuales = [];
 
   while (disponibles.length > 1) {
     let j1 = disponibles.shift();
@@ -35,28 +43,34 @@ function generarRonda() {
     if (rivalIndex === -1) rivalIndex = 0;
 
     let j2 = disponibles.splice(rivalIndex, 1)[0];
-    emparejamientos.push([j1, j2]);
+    partidosActuales.push([j1, j2]);
   }
 
-  mostrarPartidos(emparejamientos);
+  mostrarPartidos();
 }
 
-function mostrarPartidos(partidos) {
+function mostrarPartidos() {
   let cont = document.getElementById("matches");
-  cont.innerHTML = `<h3>Ronda ${ronda}</h3>`;
+  cont.innerHTML = "";
 
-  partidos.forEach((p, i) => {
+  partidosActuales.forEach((p, i) => {
     cont.innerHTML += `
       <div class="match">
-        ${p[0]} <input id="g1_${i}" type="number"> -
-        <input id="g2_${i}" type="number"> ${p[1]}
-        <button onclick="guardarResultado(${i}, '${p[0]}', '${p[1]}')">Guardar</button>
+        <span>${p[0]}</span>
+        <input id="g1_${i}" type="number">
+        <span>-</span>
+        <input id="g2_${i}" type="number">
+        <span>${p[1]}</span>
+        <button onclick="guardarResultado(${i})">OK</button>
       </div>
     `;
   });
 }
 
-function guardarResultado(i, j1, j2) {
+function guardarResultado(i) {
+  let j1 = partidosActuales[i][0];
+  let j2 = partidosActuales[i][1];
+
   let g1 = parseInt(document.getElementById(`g1_${i}`).value);
   let g2 = parseInt(document.getElementById(`g2_${i}`).value);
 
@@ -88,10 +102,20 @@ function actualizarTabla() {
     gf: goles[j]
   }));
 
-  tabla.sort((a, b) => b.pts - a.pts || b.dg - a.dg || b.gf - a.gf);
+  tabla.sort((a, b) =>
+    b.pts - a.pts ||
+    b.dg - a.dg ||
+    b.gf - a.gf
+  );
 
   let cont = document.getElementById("standings");
-  cont.innerHTML = tabla.map(j =>
-    `${j.nombre} - ${j.pts} pts (DG: ${j.dg})`
-  ).join("<br>");
+  cont.innerHTML = "";
+
+  tabla.forEach((j, i) => {
+    cont.innerHTML += `
+      <div class="standing">
+        ${i + 1}. ${j.nombre} — ${j.pts} pts (DG: ${j.dg})
+      </div>
+    `;
+  });
 }
