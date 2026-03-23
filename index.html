@@ -8,27 +8,25 @@
 </head>
 <body>
 
-  <div class="container">
-    <h1>🏆 Torneo Suizo PES6</h1>
+<h1>🏆 Torneo Suizo PES6</h1>
 
-    <section class="card">
-      <h2>Jugadores</h2>
-      <textarea id="playersInput" placeholder="Un jugador por línea"></textarea>
-      <button onclick="crearTorneo()">Crear torneo</button>
-    </section>
+<div class="section">
+  <h2>Jugadores</h2>
+  <textarea id="players"></textarea>
+  <button onclick="initTournament()">Crear torneo</button>
+</div>
 
-    <section class="card">
-      <h2 id="roundTitle">Ronda</h2>
-      <div id="matches"></div>
-      <button onclick="generarRonda()">Siguiente ronda</button>
-    </section>
+<div class="section">
+  <h2 id="roundTitle">Ronda 1</h2>
+  <div id="matches"></div>
+  <button onclick="nextRound()">Siguiente ronda</button>
+</div>
 
-    <section class="card">
-      <h2>Clasificación</h2>
-      <div id="standings"></div>
-    </section>
-  </div>
+<div class="section">
+  <h2>Clasificación</h2>
+  <div id="table"></div>
+</div>
 
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
