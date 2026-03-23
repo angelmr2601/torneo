@@ -1,35 +1,99 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Torneo Suizo PES6</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link rel="stylesheet" href="styles.css">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Torneo Suizo PES6</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="wrap">
+    <div class="title">Torneo Suizo PES6</div>
+    <p class="subtitle">App web móvil para organizar un torneo suizo de 14 jugadores.</p>
 
-<h1>🏆 Torneo Suizo PES6</h1>
+    <div class="grid">
+      <section class="card">
+        <h2>1) Configuración</h2>
+        <div class="row">
+          <div style="flex:1 1 220px">
+            <label class="small">Nombre del torneo</label>
+            <input id="tournamentName" placeholder="Ej. Torneo PES6 Viernes" />
+          </div>
+          <div style="width:120px">
+            <label class="small">Jugadores</label>
+            <input id="playerCount" type="number" min="2" max="64" value="14" />
+          </div>
+          <div style="width:120px">
+            <label class="small">Rondas</label>
+            <input id="roundCount" type="number" min="1" max="12" value="4" />
+          </div>
+        </div>
+        <div class="section-actions">
+          <button class="secondary" id="fillNamesBtn">Cargar 14 nombres rápidos</button>
+          <button id="resetPlayersBtn" class="ghost">Regenerar lista</button>
+          <button id="newTournamentBtn" class="danger">Borrar torneo</button>
+        </div>
+      </section>
 
-<div class="section">
-  <h2>Jugadores</h2>
-  <textarea id="players"></textarea>
-  <button onclick="initTournament()">Crear torneo</button>
-</div>
+      <section class="card">
+        <h2>2) Jugadores</h2>
+        <div id="playersList" class="players-grid"></div>
+        <div class="section-actions">
+          <button class="primary" id="startBtn">Crear torneo y generar ronda 1</button>
+        </div>
+      </section>
 
-<div class="section">
-  <h2 id="roundTitle">Ronda 1</h2>
-  <div id="matches"></div>
-  <button onclick="nextRound()">Siguiente ronda</button>
-</div>
+      <section class="card">
+        <h2>3) Rondas</h2>
+        <div id="roundNav" class="row"></div>
+        <p id="roundStatus" class="status">Todavía no hay rondas generadas.</p>
+        <div id="matches"></div>
+        <div class="section-actions">
+          <button class="primary" id="saveResultsBtn">Guardar resultados</button>
+          <button class="secondary" id="nextRoundBtn">Generar siguiente ronda</button>
+        </div>
+      </section>
 
-<div class="section">
-  <h2>Clasificación</h2>
-  <div id="table"></div>
-</div>
+      <section class="card">
+        <h2>4) Clasificación</h2>
+        <div class="table-wrap">
+          <table id="standingsTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="namecell">Jugador</th>
+                <th>Pts</th>
+                <th>PJ</th>
+                <th>G</th>
+                <th>E</th>
+                <th>P</th>
+                <th>GF</th>
+                <th>GC</th>
+                <th>DG</th>
+                <th>Rivales</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
 
-<script src="script.js"></script>
+      <section class="card">
+        <h2>5) Copia de seguridad</h2>
+        <div class="row">
+          <button id="exportBtn" class="secondary">Exportar JSON</button>
+          <label class="mini" style="display:inline-flex;align-items:center;gap:8px;padding:0;border:none">
+            <input id="importInput" type="file" accept="application/json" style="display:none">
+            <button id="importBtn" class="ghost" type="button">Importar JSON</button>
+          </label>
+        </div>
+        <p class="footer-note">
+          La app guarda el torneo automáticamente en el navegador del móvil mediante almacenamiento local.
+        </p>
+      </section>
+    </div>
+  </div>
 
+  <script src="script.js"></script>
 </body>
 </html>
