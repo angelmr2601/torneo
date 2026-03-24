@@ -2,69 +2,765 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0a0e1a" />
   <title>Torneo Suizo PES6</title>
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: #0f1625;
+      --card: #141c2e;
+      --card2: #1a2440;
+      --text: #e8edf5;
+      --muted: #7a8aaa;
+      --accent: #00e676;
+      --accent-dim: #00c853;
+      --accent-glow: rgba(0,230,118,.15);
+      --blue: #29b6f6;
+      --blue-dim: #0288d1;
+      --danger: #ff5252;
+      --warning: #ffab40;
+      --border: #1e2d4a;
+      --border2: #253550;
+      --radius: 18px;
+      --radius-sm: 12px;
+      --tap: 50px;
+      --font-display: 'Barlow Condensed', system-ui, sans-serif;
+      --font-body: 'Barlow', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+      min-height: 100dvh;
+      overscroll-behavior: none;
+    }
+
+    /* ── HEADER ── */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10,14,26,.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      padding-top: max(10px, env(safe-area-inset-top));
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .app-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1rem;
+      color: #02110a;
+      flex-shrink: 0;
+      letter-spacing: -1px;
+    }
+
+    .app-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: .5px;
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+
+    .app-title span {
+      display: block;
+      font-size: .7rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    /* ── TAB NAV ── */
+    .tab-bar {
+      position: sticky;
+      top: 57px;
+      z-index: 99;
+      background: rgba(10,14,26,.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      gap: 2px;
+      padding: 6px 10px;
+    }
+
+    .tab-bar::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: all .18s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-btn .tab-icon { font-size: 1rem; }
+
+    .tab-btn.active {
+      background: var(--accent-glow);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── CONTENT ── */
+    .app-content {
+      padding: 14px 12px;
+      padding-bottom: max(80px, calc(env(safe-area-inset-bottom) + 80px));
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--muted);
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── FORM ELEMENTS ── */
+    label.field-label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 500;
+      padding: 12px 14px;
+      width: 100%;
+      min-height: var(--tap);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    input[type="number"] { text-align: center; }
+
+    /* ── BUTTONS ── */
+    button {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: .9rem;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border2);
+      background: var(--card2);
+      color: var(--text);
+      padding: 12px 16px;
+      min-height: var(--tap);
+      cursor: pointer;
+      transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    button:active { transform: scale(.97); }
+    button:disabled { opacity: .4; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent-dim);
+      color: #011f0c;
+      font-weight: 900;
+      box-shadow: 0 4px 18px rgba(0,230,118,.2);
+    }
+
+    .btn-primary:not(:disabled):active {
+      box-shadow: 0 2px 8px rgba(0,230,118,.15);
+    }
+
+    .btn-blue {
+      background: var(--blue);
+      border-color: var(--blue-dim);
+      color: #001829;
+      font-weight: 800;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      border-color: #d32f2f;
+      color: white;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border2);
+      color: var(--muted);
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      border-color: #e65100;
+      color: #1a0a00;
+      font-weight: 800;
+    }
+
+    .btn-sm {
+      font-size: .78rem;
+      padding: 8px 12px;
+      min-height: 38px;
+      border-radius: 10px;
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .btn-row-2 { grid-template-columns: 1fr 1fr; }
+
+    /* ── CONFIG GRID ── */
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .config-grid .full { grid-column: 1 / -1; }
+
+    /* ── PLAYERS LIST ── */
+    .players-list { display: grid; gap: 8px; }
+
+    .player-row {
+      display: grid;
+      grid-template-columns: 38px 1fr 60px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .player-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: .85rem;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    /* ── ROUND NAV ── */
+    .round-nav {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+      margin-bottom: 12px;
+    }
+
+    .round-nav::-webkit-scrollbar { display: none; }
+
+    .round-pill {
+      flex-shrink: 0;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 999px;
+      color: var(--muted);
+      padding: 7px 14px;
+      min-height: 36px;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .round-pill.active {
+      background: rgba(41,182,246,.12);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .round-pill .done-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    /* ── MATCH CARD ── */
+    .match-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 10px;
+      transition: border-color .15s;
+    }
+
+    .match-card.complete { border-color: rgba(0,230,118,.3); }
+
+    .match-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .match-num {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--muted);
+    }
+
+    .match-badge {
+      font-size: .72rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      padding: 3px 9px;
+      border-radius: 999px;
+    }
+
+    .badge-pending {
+      background: rgba(255,171,64,.1);
+      color: var(--warning);
+      border: 1px solid rgba(255,171,64,.25);
+    }
+
+    .badge-done {
+      background: rgba(0,230,118,.1);
+      color: var(--accent);
+      border: 1px solid rgba(0,230,118,.25);
+    }
+
+    .match-body {
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .match-player {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .match-player-name {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1rem;
+      text-align: center;
+      word-break: break-word;
+      line-height: 1.15;
+    }
+
+    .match-score-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .match-vs {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: .85rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .match-score-input {
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.5rem;
+      text-align: center;
+      padding: 8px 4px;
+      width: 100%;
+      min-height: 52px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    .match-score-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(41,182,246,.12);
+    }
+
+    /* ── STANDINGS TABLE ── */
+    .standings-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 14px;
+      border: 1px solid var(--border2);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 560px;
+      font-family: var(--font-body);
+      font-size: .85rem;
+    }
+
+    th {
+      background: var(--card2);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--muted);
+      padding: 10px 8px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 9px 8px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    tbody tr:nth-child(odd) td { background: rgba(255,255,255,.015); }
+
+    td.name-col, th.name-col {
+      text-align: left;
+      min-width: 110px;
+      white-space: normal;
+      font-weight: 600;
+    }
+
+    td.pts-col {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+
+    .rank-1 td:first-child { color: #ffd700; }
+    .rank-2 td:first-child { color: #c0c0c0; }
+    .rank-3 td:first-child { color: #cd7f32; }
+
+    /* ── STATUS TEXT ── */
+    .status-line {
+      font-size: .85rem;
+      color: var(--muted);
+      margin: 0 0 10px;
+      padding: 8px 10px;
+      background: var(--surface);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      margin: 0;
+      font-size: .9rem;
+      line-height: 1.5;
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: max(90px, calc(env(safe-area-inset-bottom) + 90px));
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: .85rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 999;
+      transition: opacity .2s ease, transform .2s ease;
+      max-width: calc(100vw - 32px);
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #toast.success { border-color: var(--accent); color: var(--accent); }
+    #toast.error { border-color: var(--danger); color: var(--danger); }
+    #toast.info { border-color: var(--blue); color: var(--blue); }
+
+    /* ── BOTTOM FAB AREA ── */
+    .bottom-actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 12px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      background: rgba(10,14,26,.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      z-index: 98;
+      display: none;
+    }
+
+    .bottom-actions.visible { display: block; }
+
+    /* ── FOOTER NOTE ── */
+    .footer-note {
+      font-size: .8rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 10px 0 0;
+      text-align: center;
+    }
+
+    /* ── HELPERS ── */
+    .muted { color: var(--muted); }
+    .mt-8 { margin-top: 8px; }
+    .mb-0 { margin-bottom: 0; }
+
+    /* ── DESKTOP TWEAKS ── */
+    @media (min-width: 560px) {
+      .config-grid {
+        grid-template-columns: 1fr 100px 100px;
+      }
+      .config-grid .full {
+        grid-column: auto;
+      }
+      .btn-row { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+      .match-body {
+        grid-template-columns: 1fr 100px 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="title">Torneo Suizo PES6</div>
-    <p class="subtitle">App web móvil para organizar un torneo suizo de 14 jugadores.</p>
 
-    <div class="grid">
-      <section class="card">
-        <h2>1) Configuración</h2>
-        <div class="row">
-          <div style="flex:1 1 220px">
-            <label class="small">Nombre del torneo</label>
-            <input id="tournamentName" placeholder="Ej. Torneo PES6 Viernes" />
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="app-logo">S</div>
+    <div class="app-title">
+      Torneo Suizo
+      <span>PES6 Manager</span>
+    </div>
+  </header>
+
+  <!-- TAB BAR -->
+  <nav class="tab-bar" id="tabBar">
+    <button class="tab-btn active" data-tab="config">
+      <span class="tab-icon">⚙️</span> Config
+    </button>
+    <button class="tab-btn" data-tab="players">
+      <span class="tab-icon">👥</span> Jugadores
+    </button>
+    <button class="tab-btn" data-tab="rounds">
+      <span class="tab-icon">⚽</span> Rondas
+    </button>
+    <button class="tab-btn" data-tab="standings">
+      <span class="tab-icon">🏆</span> Tabla
+    </button>
+    <button class="tab-btn" data-tab="backup">
+      <span class="tab-icon">💾</span> Backup
+    </button>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="app-content">
+
+    <!-- TAB: CONFIG -->
+    <div class="tab-panel active" id="tab-config">
+      <div class="card">
+        <div class="card-title">Configuración</div>
+        <div class="config-grid">
+          <div class="full">
+            <label class="field-label" for="tournamentName">Nombre del torneo</label>
+            <input type="text" id="tournamentName" placeholder="Ej. Torneo PES6 Viernes" />
           </div>
-          <div style="width:120px">
-            <label class="small">Jugadores</label>
-            <input id="playerCount" type="number" min="2" max="64" value="14" />
+          <div>
+            <label class="field-label" for="playerCount">Jugadores</label>
+            <input type="number" id="playerCount" min="2" max="64" value="14" />
           </div>
-          <div style="width:120px">
-            <label class="small">Rondas</label>
-            <input id="roundCount" type="number" min="1" max="12" value="4" />
+          <div>
+            <label class="field-label" for="roundCount">Rondas</label>
+            <input type="number" id="roundCount" min="1" max="12" value="4" />
           </div>
         </div>
-        <div class="section-actions">
-          <button class="secondary" id="fillNamesBtn">Cargar 14 nombres rápidos</button>
-          <button id="resetPlayersBtn" class="ghost">Regenerar lista</button>
-          <button id="newTournamentBtn" class="danger">Borrar torneo</button>
+        <div class="btn-row">
+          <button class="btn-primary" id="startBtn">⚡ Crear torneo · Ronda 1</button>
         </div>
-      </section>
-
-      <section class="card">
-        <h2>2) Jugadores</h2>
-        <div id="playersList" class="players-grid"></div>
-        <div class="section-actions">
-          <button class="primary" id="startBtn">Crear torneo y generar ronda 1</button>
+        <div class="btn-row btn-row-2 mt-8">
+          <button class="btn-ghost btn-sm" id="fillNamesBtn">📋 Cargar nombres</button>
+          <button class="btn-danger btn-sm" id="newTournamentBtn">🗑 Borrar torneo</button>
         </div>
-      </section>
+      </div>
+    </div>
 
-      <section class="card">
-        <h2>3) Rondas</h2>
-        <div id="roundNav" class="row"></div>
-        <p id="roundStatus" class="status">Todavía no hay rondas generadas.</p>
-        <div id="matches"></div>
-        <div class="section-actions">
-          <button class="primary" id="saveResultsBtn">Guardar resultados</button>
-          <button class="secondary" id="nextRoundBtn">Generar siguiente ronda</button>
+    <!-- TAB: PLAYERS -->
+    <div class="tab-panel" id="tab-players">
+      <div class="card">
+        <div class="card-title">Jugadores</div>
+        <div id="playersList" class="players-list"></div>
+        <div class="btn-row mt-8">
+          <button class="btn-ghost btn-sm" id="resetPlayersBtn">🔄 Regenerar lista</button>
         </div>
-      </section>
+      </div>
+    </div>
 
-      <section class="card">
-        <h2>4) Clasificación</h2>
-        <div class="table-wrap">
+    <!-- TAB: ROUNDS -->
+    <div class="tab-panel" id="tab-rounds">
+      <div id="roundNav" class="round-nav"></div>
+      <div id="roundStatus" class="status-line">Todavía no hay rondas generadas.</div>
+      <div id="matches"></div>
+      <div class="btn-row">
+        <button class="btn-primary" id="saveResultsBtn">💾 Guardar resultados</button>
+        <button class="btn-blue" id="nextRoundBtn">▶ Siguiente ronda</button>
+      </div>
+    </div>
+
+    <!-- TAB: STANDINGS -->
+    <div class="tab-panel" id="tab-standings">
+      <div class="card">
+        <div class="card-title">Clasificación</div>
+        <div class="standings-wrap">
           <table id="standingsTable">
             <thead>
               <tr>
                 <th>#</th>
-                <th class="namecell">Jugador</th>
+                <th class="name-col">Jugador</th>
                 <th>Pts</th>
                 <th>PJ</th>
                 <th>G</th>
@@ -73,30 +769,520 @@
                 <th>GF</th>
                 <th>GC</th>
                 <th>DG</th>
-                <th>Rivales</th>
               </tr>
             </thead>
             <tbody></tbody>
           </table>
         </div>
-      </section>
-
-      <section class="card">
-        <h2>5) Copia de seguridad</h2>
-        <div class="row">
-          <button id="exportBtn" class="secondary">Exportar JSON</button>
-          <label class="mini" style="display:inline-flex;align-items:center;gap:8px;padding:0;border:none">
-            <input id="importInput" type="file" accept="application/json" style="display:none">
-            <button id="importBtn" class="ghost" type="button">Importar JSON</button>
-          </label>
-        </div>
-        <p class="footer-note">
-          La app guarda el torneo automáticamente en el navegador del móvil mediante almacenamiento local.
-        </p>
-      </section>
+      </div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
+    <!-- TAB: BACKUP -->
+    <div class="tab-panel" id="tab-backup">
+      <div class="card">
+        <div class="card-title">Copia de seguridad</div>
+        <div class="btn-row btn-row-2">
+          <button class="btn-blue" id="exportBtn">📤 Exportar JSON</button>
+          <button class="btn-ghost" id="importBtn" type="button">📥 Importar JSON</button>
+        </div>
+        <input id="importInput" type="file" accept="application/json" style="display:none">
+        <p class="footer-note">
+          El torneo se guarda automáticamente en el navegador.<br>
+          Usa exportar/importar para hacer copias entre dispositivos.
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+<script>
+(() => {
+  const STORAGE_KEY = 'pes6_swiss_v2';
+
+  const state = loadState() || {
+    name: '',
+    playerCount: 14,
+    roundCount: 4,
+    players: [],
+    rounds: [],
+    currentRoundIndex: 0,
+    started: false
+  };
+
+  const els = {
+    tournamentName: document.getElementById('tournamentName'),
+    playerCount:    document.getElementById('playerCount'),
+    roundCount:     document.getElementById('roundCount'),
+    playersList:    document.getElementById('playersList'),
+    roundNav:       document.getElementById('roundNav'),
+    roundStatus:    document.getElementById('roundStatus'),
+    matches:        document.getElementById('matches'),
+    standingsBody:  document.querySelector('#standingsTable tbody'),
+    startBtn:       document.getElementById('startBtn'),
+    fillNamesBtn:   document.getElementById('fillNamesBtn'),
+    resetPlayersBtn:document.getElementById('resetPlayersBtn'),
+    saveResultsBtn: document.getElementById('saveResultsBtn'),
+    nextRoundBtn:   document.getElementById('nextRoundBtn'),
+    exportBtn:      document.getElementById('exportBtn'),
+    importBtn:      document.getElementById('importBtn'),
+    importInput:    document.getElementById('importInput'),
+    newTournamentBtn:document.getElementById('newTournamentBtn')
+  };
+
+  // ── TOAST ──
+  let toastTimer;
+  function showToast(msg, type = 'info', duration = 2200) {
+    const t = document.getElementById('toast');
+    clearTimeout(toastTimer);
+    t.textContent = msg;
+    t.className = `show ${type}`;
+    toastTimer = setTimeout(() => { t.className = ''; }, duration);
+  }
+
+  // ── TABS ──
+  document.getElementById('tabBar').addEventListener('click', e => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${tab}`).classList.add('active');
+  });
+
+  // ── UTILS ──
+  function uid() { return Math.random().toString(36).slice(2, 10); }
+
+  function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? '')
+      .replaceAll('&','&amp;').replaceAll('<','&lt;')
+      .replaceAll('>','&gt;').replaceAll('"','&quot;')
+      .replaceAll("'",'&#39;');
+  }
+
+  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  }
+
+  function ensurePlayers() {
+    const count = clamp(parseInt(state.playerCount, 10) || 14, 2, 64);
+    if (!Array.isArray(state.players)) state.players = [];
+    if (state.players.length < count) {
+      for (let i = state.players.length; i < count; i++)
+        state.players.push({ id: uid(), name: `Jugador ${i + 1}` });
+    } else if (state.players.length > count) {
+      state.players = state.players.slice(0, count);
+    }
+  }
+
+  function getPlayerById(id) { return state.players.find(p => p.id === id); }
+
+  function isMatchComplete(m) { return Number.isFinite(m.score1) && Number.isFinite(m.score2); }
+
+  function currentRoundComplete() {
+    if (!state.rounds.length) return false;
+    return state.rounds[state.currentRoundIndex]?.matches.every(isMatchComplete);
+  }
+
+  function getOpponentsMap() {
+    const map = {};
+    for (const p of state.players) map[p.id] = new Set();
+    for (const round of state.rounds)
+      for (const m of round.matches) {
+        map[m.p1]?.add(m.p2);
+        map[m.p2]?.add(m.p1);
+      }
+    return map;
+  }
+
+  function computeStandings() {
+    const table = state.players.map(p => ({
+      id: p.id, name: p.name,
+      pts: 0, pj: 0, g: 0, e: 0, pe: 0,
+      gf: 0, gc: 0, dg: 0, opponents: []
+    }));
+    const byId = Object.fromEntries(table.map(r => [r.id, r]));
+
+    for (const round of state.rounds) {
+      for (const m of round.matches) {
+        const a = byId[m.p1], b = byId[m.p2];
+        if (!a || !b) continue;
+        a.opponents.push(b.name);
+        b.opponents.push(a.name);
+        if (!isMatchComplete(m)) continue;
+        a.pj++; b.pj++;
+        a.gf += m.score1; a.gc += m.score2;
+        b.gf += m.score2; b.gc += m.score1;
+        if (m.score1 > m.score2) { a.g++; b.pe++; a.pts += 3; }
+        else if (m.score1 < m.score2) { b.g++; a.pe++; b.pts += 3; }
+        else { a.e++; b.e++; a.pts++; b.pts++; }
+      }
+    }
+
+    for (const r of table) r.dg = r.gf - r.gc;
+
+    table.sort((x, y) =>
+      y.pts - x.pts || y.dg - x.dg ||
+      y.gf - x.gf || x.gc - y.gc ||
+      x.name.localeCompare(y.name, 'es')
+    );
+    return table;
+  }
+
+  // ── RENDER PLAYERS ──
+  function renderPlayers() {
+    ensurePlayers();
+    els.playersList.innerHTML = '';
+    state.players.forEach((p, idx) => {
+      const row = document.createElement('div');
+      row.className = 'player-row';
+      row.innerHTML = `
+        <div class="player-num">${idx + 1}</div>
+        <input type="text" value="${escapeHtml(p.name)}" data-pid="${p.id}" class="pname-input" />
+        <button class="btn-danger btn-sm" data-pid="${p.id}" ${state.players.length <= 2 || state.started ? 'disabled' : ''}>✕</button>
+      `;
+      els.playersList.appendChild(row);
+    });
+
+    els.playersList.querySelectorAll('.pname-input').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const pl = getPlayerById(e.target.dataset.pid);
+        if (pl) { pl.name = e.target.value.trim() || 'Sin nombre'; saveState(); renderStandings(); renderRounds(); }
+      });
+    });
+
+    els.playersList.querySelectorAll('button[data-pid]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const id = e.currentTarget.dataset.pid;
+        if (state.started) { showToast('Torneo ya iniciado', 'error'); return; }
+        state.players = state.players.filter(p => p.id !== id);
+        state.playerCount = state.players.length;
+        syncConfigInputs(); saveState(); renderAll();
+      });
+    });
+  }
+
+  // ── RENDER STANDINGS ──
+  function renderStandings() {
+    const rows = computeStandings();
+    const rankClass = ['rank-1','rank-2','rank-3'];
+    els.standingsBody.innerHTML = rows.map((r, i) => `
+      <tr class="${rankClass[i] || ''}">
+        <td>${i + 1}</td>
+        <td class="name-col">${escapeHtml(r.name)}</td>
+        <td class="pts-col">${r.pts}</td>
+        <td>${r.pj}</td>
+        <td>${r.g}</td>
+        <td>${r.e}</td>
+        <td>${r.pe}</td>
+        <td>${r.gf}</td>
+        <td>${r.gc}</td>
+        <td>${r.dg >= 0 ? '+' + r.dg : r.dg}</td>
+      </tr>
+    `).join('');
+  }
+
+  // ── RENDER ROUNDS ──
+  function renderRounds() {
+    els.roundNav.innerHTML = '';
+
+    if (!state.rounds.length) {
+      els.roundStatus.textContent = 'Todavía no hay rondas generadas.';
+      els.matches.innerHTML = `
+        <div class="empty-state">
+          <span class="empty-icon">⚽</span>
+          <p>Configura el torneo y pulsa<br><strong>Crear torneo · Ronda 1</strong></p>
+        </div>`;
+      return;
+    }
+
+    state.rounds.forEach((round, idx) => {
+      const allDone = round.matches.every(isMatchComplete);
+      const pill = document.createElement('button');
+      pill.className = 'round-pill' + (idx === state.currentRoundIndex ? ' active' : '');
+      pill.innerHTML = (allDone ? '<span class="done-dot"></span>' : '') + `R${idx + 1}`;
+      pill.addEventListener('click', () => {
+        state.currentRoundIndex = idx;
+        saveState(); renderRounds();
+      });
+      els.roundNav.appendChild(pill);
+    });
+
+    const current = state.rounds[state.currentRoundIndex];
+    const done = current.matches.filter(isMatchComplete).length;
+    const total = current.matches.length;
+    els.roundStatus.textContent = `Ronda ${state.currentRoundIndex + 1} · ${done}/${total} partidos completados`;
+
+    els.matches.innerHTML = current.matches.map((m, i) => {
+      const p1 = getPlayerById(m.p1)?.name || '?';
+      const p2 = getPlayerById(m.p2)?.name || '?';
+      const complete = isMatchComplete(m);
+      return `
+        <div class="match-card ${complete ? 'complete' : ''}">
+          <div class="match-header">
+            <span class="match-num">Partido ${i + 1}</span>
+            <span class="match-badge ${complete ? 'badge-done' : 'badge-pending'}">${complete ? '✓ Guardado' : 'Pendiente'}</span>
+          </div>
+          <div class="match-body">
+            <div class="match-player">
+              <div class="match-player-name">${escapeHtml(p1)}</div>
+              <input class="match-score-input" type="number" min="0" inputmode="numeric"
+                data-mid="${m.id}" data-side="1"
+                value="${Number.isFinite(m.score1) ? m.score1 : ''}"
+                placeholder="–" />
+            </div>
+            <div class="match-score-wrap">
+              <div class="match-vs">VS</div>
+            </div>
+            <div class="match-player">
+              <div class="match-player-name">${escapeHtml(p2)}</div>
+              <input class="match-score-input" type="number" min="0" inputmode="numeric"
+                data-mid="${m.id}" data-side="2"
+                value="${Number.isFinite(m.score2) ? m.score2 : ''}"
+                placeholder="–" />
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateNextRoundBtn();
+  }
+
+  function updateNextRoundBtn() {
+    els.nextRoundBtn.disabled = !canGenerateNextRound();
+  }
+
+  function updateCurrentRoundScoresFromUI() {
+    if (!state.rounds.length) return;
+    const current = state.rounds[state.currentRoundIndex];
+    document.querySelectorAll('.match-score-input').forEach(inp => {
+      const mid = inp.dataset.mid;
+      const side = inp.dataset.side;
+      const match = current.matches.find(m => m.id === mid);
+      if (!match) return;
+      const parsed = parseInt(inp.value, 10);
+      if (side === '1') match.score1 = Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+      else match.score2 = Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+    });
+  }
+
+  // ── PAIRINGS ──
+  function createRoundOne() {
+    const shuffled = shuffle(state.players.map(p => p.id));
+    const matches = [];
+    for (let i = 0; i < shuffled.length; i += 2)
+      matches.push({ id: uid(), p1: shuffled[i], p2: shuffled[i + 1], score1: null, score2: null });
+    return { id: uid(), matches };
+  }
+
+  function swissPairNextRound() {
+    const standings = computeStandings();
+    const opponentsMap = getOpponentsMap();
+    const ids = standings.map(s => s.id);
+    const pointsById = Object.fromEntries(standings.map(s => [s.id, s.pts]));
+
+    function sortCandidates(remaining, anchorId) {
+      return [...remaining].sort((a, b) => {
+        const ra = opponentsMap[anchorId].has(a) ? 1 : 0;
+        const rb = opponentsMap[anchorId].has(b) ? 1 : 0;
+        const da = Math.abs(pointsById[anchorId] - pointsById[a]);
+        const db = Math.abs(pointsById[anchorId] - pointsById[b]);
+        return ra - rb || da - db;
+      });
+    }
+
+    function backtrack(remaining) {
+      if (!remaining.length) return [];
+      const a = remaining[0];
+      const rest = remaining.slice(1);
+      for (const b of sortCandidates(rest, a)) {
+        const sub = backtrack(rest.filter(id => id !== b));
+        if (sub) return [[a, b], ...sub];
+      }
+      return null;
+    }
+
+    let pairings = backtrack(ids);
+
+    if (!pairings) {
+      const rem = [...ids]; pairings = [];
+      while (rem.length) {
+        const a = rem.shift();
+        let bi = 0, bs = Infinity;
+        for (let i = 0; i < rem.length; i++) {
+          const sc = (opponentsMap[a].has(rem[i]) ? 1000 : 0) + Math.abs(pointsById[a] - pointsById[rem[i]]);
+          if (sc < bs) { bs = sc; bi = i; }
+        }
+        pairings.push([a, rem.splice(bi, 1)[0]]);
+      }
+    }
+
+    return { id: uid(), matches: pairings.map(([p1, p2]) => ({ id: uid(), p1, p2, score1: null, score2: null })) };
+  }
+
+  function canGenerateNextRound() {
+    if (!state.started || !state.rounds.length) return false;
+    if (!currentRoundComplete()) return false;
+    return state.rounds.length < state.roundCount;
+  }
+
+  function generateNextRound() {
+    if (!canGenerateNextRound()) {
+      if (state.rounds.length >= state.roundCount)
+        showToast('Ya se generaron todas las rondas', 'error');
+      else
+        showToast('Completa todos los resultados primero', 'error');
+      return;
+    }
+    const next = swissPairNextRound();
+    state.rounds.push(next);
+    state.currentRoundIndex = state.rounds.length - 1;
+    saveState(); renderAll();
+    showToast(`Ronda ${state.rounds.length} generada`, 'success');
+    // Switch to rounds tab
+    document.querySelector('[data-tab="rounds"]').click();
+  }
+
+  function startTournament() {
+    updateConfigFromInputs();
+    ensurePlayers();
+    if (state.players.some(p => !p.name.trim())) {
+      showToast('Todos los jugadores necesitan nombre', 'error'); return;
+    }
+    if (state.players.length % 2 !== 0) {
+      showToast('Se necesita número par de jugadores', 'error'); return;
+    }
+    state.started = true;
+    state.rounds = [createRoundOne()];
+    state.currentRoundIndex = 0;
+    saveState(); renderAll();
+    showToast('¡Torneo creado! Ronda 1 generada ⚽', 'success');
+    document.querySelector('[data-tab="rounds"]').click();
+  }
+
+  // ── SYNC ──
+  function syncConfigInputs() {
+    els.tournamentName.value = state.name || '';
+    els.playerCount.value = state.playerCount;
+    els.roundCount.value = state.roundCount;
+  }
+
+  function updateConfigFromInputs() {
+    state.name = els.tournamentName.value.trim();
+    state.playerCount = clamp(parseInt(els.playerCount.value, 10) || 14, 2, 64);
+    state.roundCount = clamp(parseInt(els.roundCount.value, 10) || 4, 1, 12);
+    ensurePlayers(); saveState();
+  }
+
+  function renderAll() {
+    syncConfigInputs(); ensurePlayers();
+    renderPlayers(); renderRounds(); renderStandings();
+    updateNextRoundBtn(); saveState();
+  }
+
+  // ── EXPORT / IMPORT ──
+  function exportJSON() {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    const safeName = (state.name || 'torneo-pes6').toLowerCase().replace(/[^a-z0-9_-]+/gi, '-');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${safeName}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast('Exportado correctamente', 'success');
+  }
+
+  function importJSON(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const imported = JSON.parse(e.target.result);
+        if (!imported || !Array.isArray(imported.players)) throw new Error();
+        Object.assign(state, imported);
+        saveState(); renderAll();
+        showToast('Torneo importado ✓', 'success');
+      } catch { showToast('Archivo no válido', 'error'); }
+    };
+    reader.readAsText(file);
+  }
+
+  function fillQuickNames() {
+    const base = ['Alex','Beni','Carlos','Dani','Eloy','Fede','Guille','Hugo','Iván','Javi','Kike','Luis','Mario','Nico'];
+    state.playerCount = 14;
+    state.players = base.map(n => ({ id: uid(), name: n }));
+    syncConfigInputs(); saveState(); renderPlayers();
+    showToast('14 nombres cargados', 'info');
+    document.querySelector('[data-tab="players"]').click();
+  }
+
+  // ── EVENTS ──
+  els.tournamentName.addEventListener('input', updateConfigFromInputs);
+  els.playerCount.addEventListener('change', () => {
+    if (state.started) { syncConfigInputs(); showToast('No puedes cambiar jugadores', 'error'); return; }
+    updateConfigFromInputs(); renderPlayers();
+  });
+  els.roundCount.addEventListener('change', () => { updateConfigFromInputs(); renderAll(); });
+
+  els.fillNamesBtn.addEventListener('click', fillQuickNames);
+  els.resetPlayersBtn.addEventListener('click', () => {
+    if (state.started) { showToast('Torneo ya iniciado', 'error'); return; }
+    updateConfigFromInputs();
+    state.players = []; ensurePlayers(); saveState(); renderPlayers();
+    showToast('Lista regenerada', 'info');
+  });
+  els.startBtn.addEventListener('click', () => {
+    if (state.started && !confirm('Ya hay un torneo. ¿Empezar de nuevo?')) return;
+    startTournament();
+  });
+  els.saveResultsBtn.addEventListener('click', () => {
+    if (!state.rounds.length) { showToast('Primero crea el torneo', 'error'); return; }
+    updateCurrentRoundScoresFromUI();
+    saveState(); renderAll();
+    showToast('Resultados guardados ✓', 'success');
+  });
+  els.nextRoundBtn.addEventListener('click', () => {
+    updateCurrentRoundScoresFromUI(); generateNextRound();
+  });
+  els.exportBtn.addEventListener('click', exportJSON);
+  els.importBtn.addEventListener('click', () => els.importInput.click());
+  els.importInput.addEventListener('change', e => {
+    const file = e.target.files?.[0];
+    if (file) importJSON(file);
+    e.target.value = '';
+  });
+  els.newTournamentBtn.addEventListener('click', () => {
+    if (!confirm('Se borrará todo el torneo actual. ¿Continuar?')) return;
+    state.name = ''; state.playerCount = 14; state.roundCount = 4;
+    state.players = []; state.rounds = [];
+    state.currentRoundIndex = 0; state.started = false;
+    ensurePlayers(); saveState(); renderAll();
+    showToast('Torneo borrado', 'info');
+    document.querySelector('[data-tab="config"]').click();
+  });
+
+  ensurePlayers();
+  renderAll();
+})();
+</script>
 </body>
 </html>
