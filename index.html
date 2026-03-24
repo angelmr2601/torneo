@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -21,8 +22,15 @@
       --radius-sm: 14px;
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html { height: 100%; }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      height: 100%;
+    }
+
     body {
       margin: 0;
       min-height: 100%;
@@ -31,7 +39,11 @@
       color: var(--text);
     }
 
-    button, input, select { font: inherit; }
+    button,
+    input,
+    select {
+      font: inherit;
+    }
 
     .container {
       width: min(100% - 16px, 1180px);
@@ -45,19 +57,43 @@
       margin-bottom: 14px;
     }
 
-    h1, h2, h3 { margin: 0; }
-    h1 { font-size: 1.75rem; line-height: 1.1; }
-    h2 { font-size: 1.1rem; }
-    h3 { font-size: 1rem; }
-    .subtitle { color: var(--muted); margin-top: 6px; font-size: .95rem; line-height: 1.45; }
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+    }
 
-    .toolbar, .row, .tabs {
+    h1 {
+      font-size: 1.75rem;
+      line-height: 1.1;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+    }
+
+    h3 {
+      font-size: 1rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: .95rem;
+      line-height: 1.45;
+    }
+
+    .toolbar,
+    .row,
+    .tabs {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
     }
 
-    .toolbar { width: 100%; }
+    .toolbar {
+      width: 100%;
+    }
 
     .tabs {
       position: sticky;
@@ -68,13 +104,17 @@
       overflow-x: auto;
       flex-wrap: nowrap;
       scrollbar-width: none;
-      background: linear-gradient(to bottom, rgba(243,246,251,.98), rgba(243,246,251,.92));
+      background: linear-gradient(to bottom, rgba(243, 246, 251, .98), rgba(243, 246, 251, .92));
       backdrop-filter: blur(8px);
     }
 
-    .tabs::-webkit-scrollbar { display: none; }
+    .tabs::-webkit-scrollbar {
+      display: none;
+    }
 
-    .tab-btn, .btn, .file-label {
+    .tab-btn,
+    .btn,
+    .file-label {
       border: 1px solid var(--line);
       background: white;
       color: var(--text);
@@ -92,18 +132,37 @@
       white-space: nowrap;
     }
 
-    .tab-btn { flex: 0 0 auto; }
-    .toolbar .btn, .toolbar .file-label { flex: 1 1 calc(50% - 4px); }
+    .tab-btn {
+      flex: 0 0 auto;
+    }
 
-    .tab-btn.active, .btn.primary {
+    .toolbar .btn,
+    .toolbar .file-label {
+      flex: 1 1 calc(50% - 4px);
+    }
+
+    .tab-btn.active,
+    .btn.primary {
       background: var(--accent);
       color: white;
       border-color: var(--accent);
     }
 
-    .btn.danger { background: var(--danger); color: white; border-color: var(--danger); }
-    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-    .hidden { display: none !important; }
+    .btn.danger {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
 
     .card {
       background: var(--card);
@@ -114,13 +173,30 @@
       margin-bottom: 12px;
     }
 
-    .grid { display: grid; gap: 12px; }
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
 
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field label { font-size: 13px; color: var(--muted); font-weight: 700; }
+    .grid-2,
+    .grid-3 {
+      grid-template-columns: 1fr;
+    }
 
-    input, select {
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    input,
+    select {
       width: 100%;
       min-height: 46px;
       padding: 11px 12px;
@@ -145,7 +221,10 @@
       line-height: 1;
     }
 
-    .player-row, .summary-row, .podium-item, .qualified-item {
+    .player-row,
+    .summary-row,
+    .podium-item,
+    .qualified-item {
       border: 1px solid var(--line);
       border-radius: var(--radius-sm);
       padding: 12px;
@@ -196,7 +275,9 @@
       gap: 8px;
     }
 
-    .player-box.right { text-align: right; }
+    .player-box.right {
+      text-align: right;
+    }
 
     .player-name {
       font-weight: 800;
@@ -246,12 +327,29 @@
       font-weight: 600;
     }
 
-    .center { text-align: center; }
-    .right { text-align: right; }
-    .muted { color: var(--muted); }
-    .warning { color: var(--warning); }
-    .success { color: var(--success); }
-    .danger { color: var(--danger); }
+    .center {
+      text-align: center;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .warning {
+      color: var(--warning);
+    }
+
+    .success {
+      color: var(--success);
+    }
+
+    .danger {
+      color: var(--danger);
+    }
 
     .section-head {
       display: flex;
@@ -268,17 +366,26 @@
       font-size: 14px;
     }
 
-    th, td {
+    th,
+    td {
       padding: 10px 8px;
       border-bottom: 1px solid var(--line);
       text-align: left;
       white-space: nowrap;
     }
 
-    th { color: var(--muted); font-weight: 800; font-size: 12px; }
-    .table-wrap { overflow-x: auto; }
+    th {
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 12px;
+    }
 
-    .top-list, .qualified-list {
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .top-list,
+    .qualified-list {
       display: grid;
       gap: 8px;
     }
@@ -288,7 +395,7 @@
       border-radius: var(--radius-sm);
       padding: 14px;
       color: var(--muted);
-      background: rgba(255,255,255,.72);
+      background: rgba(255, 255, 255, .72);
       line-height: 1.45;
     }
 
@@ -299,22 +406,57 @@
     }
 
     @media (min-width: 700px) {
-      .container { width: min(100% - 24px, 1180px); margin-top: 20px; }
-      .header { grid-template-columns: 1fr auto; align-items: start; }
-      .toolbar { width: auto; justify-content: flex-end; }
-      .toolbar .btn, .toolbar .file-label { flex: 0 0 auto; }
-      .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .top-list, .qualified-list { display: flex; flex-wrap: wrap; }
+      .container {
+        width: min(100% - 24px, 1180px);
+        margin-top: 20px;
+      }
+
+      .header {
+        grid-template-columns: 1fr auto;
+        align-items: start;
+      }
+
+      .toolbar {
+        width: auto;
+        justify-content: flex-end;
+      }
+
+      .toolbar .btn,
+      .toolbar .file-label {
+        flex: 0 0 auto;
+      }
+
+      .grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .top-list,
+      .qualified-list {
+        display: flex;
+        flex-wrap: wrap;
+      }
     }
 
     @media (min-width: 980px) {
-      h1 { font-size: 2.15rem; }
-      .card { padding: 18px; }
-      .match-card { padding: 14px; }
+      h1 {
+        font-size: 2.15rem;
+      }
+
+      .card {
+        padding: 18px;
+      }
+
+      .match-card {
+        padding: 14px;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="header">
@@ -378,7 +520,8 @@
         </div>
 
         <div id="playersList" class="grid" style="margin-top: 14px;"></div>
-        <div id="playersLockMsg" class="warning hidden" style="margin-top: 10px;">No se pueden borrar jugadores una vez empezado el torneo.</div>
+        <div id="playersLockMsg" class="warning hidden" style="margin-top: 10px;">No se pueden borrar jugadores una vez
+          empezado el torneo.</div>
       </div>
     </section>
 
@@ -395,58 +538,83 @@
           </div>
         </div>
       </div>
-      <div id="roundsContainer"></div>
-    </section>
-
-    <section class="tab-panel hidden" id="tab-standings">
-      <div class="card">
-        <h2>Clasificación</h2>
-        <div class="table-wrap" style="margin-top: 14px;">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th><th>Jugador</th><th>Pts</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Buchholz</th>
-              </tr>
-            </thead>
-            <tbody id="standingsBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section class="tab-panel hidden" id="tab-knockout">
-      <div class="card">
-        <div class="section-head">
-          <div>
-            <h2>Eliminatorias</h2>
-            <div id="knockoutMsg" class="muted" style="margin-top: 6px;"></div>
+      div class="card">
+      <div class="section-head">
+        <div>
+          <h3>Ver ronda</h3>
+          <div class="muted" style="margin-top: 6px;">
+            Muestra una sola ronda para evitar scroll infinito
           </div>
-          <button class="btn primary" id="generateKnockoutBtn">Generar KO</button>
         </div>
-        <div id="knockoutContainer" style="margin-top: 16px;"></div>
+        <div class="field" style="min-width: 180px; margin: 0;">
+          <select id="roundSelector"></select>
+        </div>
       </div>
-    </section>
+  </div>
 
-    <section class="tab-panel hidden" id="tab-summary">
-      <div class="grid grid-2">
-        <div class="card">
-          <h2>Siguientes partidos</h2>
-          <div id="pendingMatches" style="margin-top: 14px;"></div>
-        </div>
-        <div class="card">
-          <h2>Top actual</h2>
-          <div id="topList" style="margin-top: 14px;"></div>
-        </div>
-      </div>
-      <div class="card" id="podiumCard" style="display:none;">
-        <h2>Podio final</h2>
-        <div class="grid grid-3" id="podiumList" style="margin-top: 14px;"></div>
-      </div>
-    </section>
+  <div id="roundsContainer"></div>
+  </section>
 
-    <div class="card footer-note">
-      Diseño mobile-first: botones grandes, navegación superior fija, tarjetas compactas y campos cómodos para usar desde el móvil. Para 14 jugadores, 4 rondas suizas + Top 8 suele funcionar muy bien.
+  <section class="tab-panel hidden" id="tab-standings">
+    <div class="card">
+      <h2>Clasificación</h2>
+      <div class="table-wrap" style="margin-top: 14px;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Jugador</th>
+              <th>Pts</th>
+              <th>PJ</th>
+              <th>G</th>
+              <th>E</th>
+              <th>P</th>
+              <th>GF</th>
+              <th>GC</th>
+              <th>DG</th>
+              <th>Buchholz</th>
+            </tr>
+          </thead>
+          <tbody id="standingsBody"></tbody>
+        </table>
+      </div>
     </div>
+  </section>
+
+  <section class="tab-panel hidden" id="tab-knockout">
+    <div class="card">
+      <div class="section-head">
+        <div>
+          <h2>Eliminatorias</h2>
+          <div id="knockoutMsg" class="muted" style="margin-top: 6px;"></div>
+        </div>
+        <button class="btn primary" id="generateKnockoutBtn">Generar KO</button>
+      </div>
+      <div id="knockoutContainer" style="margin-top: 16px;"></div>
+    </div>
+  </section>
+
+  <section class="tab-panel hidden" id="tab-summary">
+    <div class="grid grid-2">
+      <div class="card">
+        <h2>Siguientes partidos</h2>
+        <div id="pendingMatches" style="margin-top: 14px;"></div>
+      </div>
+      <div class="card">
+        <h2>Top actual</h2>
+        <div id="topList" style="margin-top: 14px;"></div>
+      </div>
+    </div>
+    <div class="card" id="podiumCard" style="display:none;">
+      <h2>Podio final</h2>
+      <div class="grid grid-3" id="podiumList" style="margin-top: 14px;"></div>
+    </div>
+  </section>
+
+  <div class="card footer-note">
+    Diseño mobile-first: botones grandes, navegación superior fija, tarjetas compactas y campos cómodos para usar desde
+    el móvil. Para 14 jugadores, 4 rondas suizas + Top 8 suele funcionar muy bien.
+  </div>
   </div>
 
   <script>
@@ -461,17 +629,20 @@
     }
 
     function getInitialState() {
-      return {
-        config: {
-          tournamentName: 'Torneo PES6',
-          swissRounds: 4,
-          knockoutSize: 8,
-        },
-        players: getInitialPlayers(),
-        rounds: [],
-        knockout: null,
-      };
-    }
+  return {
+    ui: {
+      selectedSwissRound: 1,
+    },
+    config: {
+      tournamentName: 'Torneo PES6',
+      swissRounds: 4,
+      knockoutSize: 8,
+    },
+    players: getInitialPlayers(),
+    rounds: [],
+    knockout: null,
+  };
+}
 
     let state = loadState();
 
@@ -788,59 +959,94 @@
     }
 
     function renderRounds() {
-      const container = document.getElementById('roundsContainer');
-      const btn = document.getElementById('nextRoundBtn');
-      const msg = document.getElementById('nextRoundMsg');
+  const container = document.getElementById('roundsContainer');
+  const btn = document.getElementById('nextRoundBtn');
+  const msg = document.getElementById('nextRoundMsg');
+  const selector = document.getElementById('roundSelector');
 
-      const canGenerate = currentRoundComplete() && state.rounds.length < Number(state.config.swissRounds) && state.players.length >= 4;
-      btn.disabled = !canGenerate;
+  const canGenerate =
+    currentRoundComplete() &&
+    state.rounds.length < Number(state.config.swissRounds) &&
+    state.players.length >= 4;
 
-      if (state.rounds.length === 0) msg.textContent = 'Todavía no hay rondas creadas.';
-      else if (!currentRoundComplete()) msg.textContent = 'Termina la ronda actual para generar la siguiente.';
-      else if (state.rounds.length >= Number(state.config.swissRounds)) msg.textContent = 'Ya se han creado todas las rondas suizas configuradas.';
-      else msg.textContent = 'Puedes generar la siguiente ronda.';
+  btn.disabled = !canGenerate;
 
-      if (!state.rounds.length) {
-        container.innerHTML = '';
-        return;
-      }
+  if (state.rounds.length === 0)
+    msg.textContent = 'Todavía no hay rondas creadas.';
+  else if (!currentRoundComplete())
+    msg.textContent = 'Termina la ronda actual para generar la siguiente.';
+  else if (state.rounds.length >= Number(state.config.swissRounds))
+    msg.textContent = 'Ya se han creado todas las rondas.';
+  else
+    msg.textContent = 'Puedes generar la siguiente ronda.';
 
-      container.innerHTML = state.rounds.map((round, ri) => `
-        <div class="card">
-          <div class="section-head">
-            <h3>Ronda ${round.roundNumber}</h3>
-            <div class="pill">${round.matches.filter(m => m.played).length}/${round.matches.length}</div>
-          </div>
-          <div class="grid">
-            ${round.matches.map(m => m.bye ? `
-              <div class="empty"><strong>${escapeHtml(playerName(m.player1Id))}</strong> descansa y recibe victoria automática.</div>
-            ` : `
-              <div class="match-card">
-                <div class="match-head">
-                  <span>Partido</span>
-                  <span>${m.played ? 'Guardado' : 'Pendiente'}</span>
-                </div>
-                <div class="match-players">
-                  <div class="player-box">
-                    <div class="player-name">${escapeHtml(playerName(m.player1Id))}</div>
-                    <input class="score-input" type="number" inputmode="numeric" min="0" value="${m.score1}" data-swiss-score1="${ri}|${m.id}" />
-                  </div>
-                  <div class="vs-badge">VS</div>
-                  <div class="player-box right">
-                    <div class="player-name">${escapeHtml(playerName(m.player2Id))}</div>
-                    <input class="score-input" type="number" inputmode="numeric" min="0" value="${m.score2}" data-swiss-score2="${ri}|${m.id}" />
-                  </div>
-                </div>
-                <div class="match-footer">
-                  <label class="check-inline"><input type="checkbox" data-swiss-played="${ri}|${m.id}" ${m.played ? 'checked' : ''}/> Partido jugado</label>
-                  <span>${m.played ? 'Resultado registrado' : 'A falta de jugarse'}</span>
-                </div>
-              </div>
-            `).join('')}
-          </div>
+  // sin rondas
+  if (!state.rounds.length) {
+    selector.innerHTML = '<option>Sin rondas</option>';
+    selector.disabled = true;
+    container.innerHTML = '';
+    return;
+  }
+
+  selector.disabled = false;
+
+  if (!state.ui) state.ui = {};
+  if (!state.ui.selectedSwissRound || state.ui.selectedSwissRound > state.rounds.length) {
+    state.ui.selectedSwissRound = state.rounds.length;
+  }
+
+  // llenar selector
+  selector.innerHTML = state.rounds
+    .map(r => `<option value="${r.roundNumber}">Ronda ${r.roundNumber}</option>`)
+    .join('');
+
+  selector.value = state.ui.selectedSwissRound;
+
+  const round = state.rounds.find(r => r.roundNumber == state.ui.selectedSwissRound);
+  const ri = state.rounds.indexOf(round);
+
+  container.innerHTML = `
+    <div class="card">
+      <div class="section-head">
+        <h3>Ronda ${round.roundNumber}</h3>
+        <div class="pill">
+          ${round.matches.filter(m => m.played).length}/${round.matches.length}
         </div>
-      `).join('');
-    }
+      </div>
+
+      <div class="grid">
+        ${round.matches.map(m => m.bye ? `
+          <div class="empty">
+            <strong>${playerName(m.player1Id)}</strong> descansa
+          </div>
+        ` : `
+          <div class="match-card">
+            <div class="match-players">
+              <div>
+                <div class="player-name">${playerName(m.player1Id)}</div>
+                <input type="number" value="${m.score1}" data-swiss-score1="${ri}|${m.id}">
+              </div>
+
+              <div class="vs-badge">VS</div>
+
+              <div class="right">
+                <div class="player-name">${playerName(m.player2Id)}</div>
+                <input type="number" value="${m.score2}" data-swiss-score2="${ri}|${m.id}">
+              </div>
+            </div>
+
+            <div class="match-footer">
+              <label>
+                <input type="checkbox" data-swiss-played="${ri}|${m.id}" ${m.played ? 'checked' : ''}>
+                Jugado
+              </label>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
 
     function renderStandings() {
       const standings = computeStandings();
@@ -932,18 +1138,18 @@
 
       const swissPending = state.rounds.length
         ? state.rounds[state.rounds.length - 1].matches.filter(m => !m.played && !m.bye).map(m => ({
-            label: `Ronda ${state.rounds[state.rounds.length - 1].roundNumber}`,
-            p1: playerName(m.player1Id),
-            p2: playerName(m.player2Id),
-          }))
+          label: `Ronda ${state.rounds[state.rounds.length - 1].roundNumber}`,
+          p1: playerName(m.player1Id),
+          p2: playerName(m.player2Id),
+        }))
         : [];
 
       const koPending = state.knockout
         ? state.knockout.rounds.flatMap(round => round.matches.filter(m => !m.played).map(m => ({
-            label: round.name,
-            p1: playerName(m.player1Id),
-            p2: playerName(m.player2Id),
-          })))
+          label: round.name,
+          p1: playerName(m.player1Id),
+          p2: playerName(m.player2Id),
+        })))
         : [];
 
       const items = swissPending.length ? swissPending : koPending;
@@ -1026,6 +1232,11 @@
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.getElementById('roundSelector').addEventListener('change', e => {
+      state.ui.selectedSwissRound = Number(e.target.value);
+      render();
     });
 
     document.getElementById('tournamentName').addEventListener('input', e => {
@@ -1130,6 +1341,10 @@
       if (state.rounds.length >= Number(state.config.swissRounds)) return;
       if (state.players.length < 4) return;
       state.rounds.push(generateSwissPairings());
+
+      if (!state.ui) state.ui = {};
+      state.ui.selectedSwissRound = state.rounds.length;
+
       render();
       switchTab('swiss');
     });
@@ -1177,4 +1392,5 @@
     render();
   </script>
 </body>
+
 </html>
