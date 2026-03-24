@@ -199,7 +199,8 @@
     }
 
     input[type="text"],
-    input[type="number"] {
+    input[type="number"],
+    textarea {
       background: var(--surface);
       border: 1px solid var(--border2);
       border-radius: var(--radius-sm);
@@ -214,8 +215,14 @@
       transition: border-color .15s, box-shadow .15s;
     }
 
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
     input[type="text"]:focus,
-    input[type="number"]:focus {
+    input[type="number"]:focus,
+    textarea:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-glow);
     }
@@ -488,47 +495,6 @@
       box-shadow: 0 0 0 3px rgba(41,182,246,.12);
     }
 
-    .summary-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px;
-      margin-top: 12px;
-    }
-
-    .summary-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .summary-item {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-size: .92rem;
-      line-height: 1.45;
-    }
-
-    .summary-item strong {
-      font-family: var(--font-display);
-      letter-spacing: .3px;
-    }
-
-    .summary-round-tag {
-      color: var(--blue);
-      font-family: var(--font-display);
-      font-weight: 800;
-      text-transform: uppercase;
-      margin-right: 6px;
-    }
-
-    .summary-empty {
-      color: var(--muted);
-      text-align: center;
-      padding: 10px 0 2px;
-    }
-
     .standings-wrap {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -568,7 +534,6 @@
     }
 
     tbody tr:last-child td { border-bottom: none; }
-
     tbody tr:nth-child(odd) td { background: rgba(255,255,255,.015); }
 
     td.name-col, th.name-col {
@@ -648,23 +613,6 @@
     #toast.error { border-color: var(--danger); color: var(--danger); }
     #toast.info { border-color: var(--blue); color: var(--blue); }
 
-    .bottom-actions {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 8px 12px;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
-      background: rgba(10,14,26,.95);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border);
-      z-index: 98;
-      display: none;
-    }
-
-    .bottom-actions.visible { display: block; }
-
     .footer-note {
       font-size: .8rem;
       color: var(--muted);
@@ -677,6 +625,60 @@
     .mt-8 { margin-top: 8px; }
     .mb-0 { margin-bottom: 0; }
 
+    .info-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--text);
+    }
+
+    .info-list li {
+      margin-bottom: 8px;
+    }
+
+    .summary-list,
+    .final-list,
+    .qualified-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .summary-item,
+    .final-item,
+    .qualified-item {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: .9rem;
+    }
+
+    .phase-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .phase-box {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .phase-box h4 {
+      margin: 0 0 8px;
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      font-size: .95rem;
+      color: var(--blue);
+    }
+
+    .small-note {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
     @media (min-width: 560px) {
       .config-grid {
         grid-template-columns: 1fr 100px 100px;
@@ -688,10 +690,14 @@
       .match-body {
         grid-template-columns: 1fr 100px 1fr;
       }
+      .phase-grid {
+        grid-template-columns: 1fr 1fr;
+      }
     }
   </style>
 </head>
 <body>
+
   <header class="app-header">
     <div class="app-logo">S</div>
     <div class="app-title">
@@ -707,11 +713,17 @@
     <button class="tab-btn" data-tab="players">
       <span class="tab-icon">👥</span> Jugadores
     </button>
+    <button class="tab-btn" data-tab="format">
+      <span class="tab-icon">📖</span> Formato
+    </button>
     <button class="tab-btn" data-tab="rounds">
       <span class="tab-icon">⚽</span> Rondas
     </button>
     <button class="tab-btn" data-tab="standings">
       <span class="tab-icon">🏆</span> Tabla
+    </button>
+    <button class="tab-btn" data-tab="final">
+      <span class="tab-icon">🔥</span> Fase final
     </button>
     <button class="tab-btn" data-tab="backup">
       <span class="tab-icon">💾</span> Backup
@@ -719,6 +731,7 @@
   </nav>
 
   <main class="app-content">
+
     <div class="tab-panel active" id="tab-config">
       <div class="card">
         <div class="card-title">Configuración</div>
@@ -756,14 +769,65 @@
       </div>
     </div>
 
+    <div class="tab-panel" id="tab-format">
+      <div class="card">
+        <div class="card-title">Formato del torneo</div>
+        <p class="status-line">
+          Este torneo usa sistema suizo: todos los jugadores disputan todas las rondas programadas y la clasificación se actualiza tras cada jornada.
+        </p>
+
+        <div class="phase-grid">
+          <div class="phase-box">
+            <h4>Sorteo inicial</h4>
+            <ul class="info-list">
+              <li>La ronda 1 se genera por sorteo aleatorio.</li>
+              <li>Los jugadores se mezclan automáticamente.</li>
+              <li>Se crean emparejamientos de 2 en 2.</li>
+              <li>Para evitar problemas, el torneo requiere número par de jugadores.</li>
+            </ul>
+          </div>
+
+          <div class="phase-box">
+            <h4>Rondas siguientes</h4>
+            <ul class="info-list">
+              <li>Se emparejan jugadores con puntuación parecida.</li>
+              <li>El sistema intenta evitar rivales repetidos.</li>
+              <li>Si no hay combinación perfecta, usa la mejor alternativa disponible.</li>
+              <li>Cada nueva ronda solo se habilita cuando la actual está completa.</li>
+            </ul>
+          </div>
+
+          <div class="phase-box">
+            <h4>Puntuación</h4>
+            <ul class="info-list">
+              <li>Victoria: 3 puntos</li>
+              <li>Empate: 1 punto</li>
+              <li>Derrota: 0 puntos</li>
+            </ul>
+          </div>
+
+          <div class="phase-box">
+            <h4>Desempates</h4>
+            <ul class="info-list">
+              <li>Puntos</li>
+              <li>Diferencia de goles</li>
+              <li>Goles a favor</li>
+              <li>Menos goles encajados</li>
+              <li>Orden alfabético como último criterio visual</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="small-note">
+          Consejo: tras la fase suiza puedes usar la pestaña “Fase final” para ver los clasificados provisionales y los cruces sugeridos.
+        </p>
+      </div>
+    </div>
+
     <div class="tab-panel" id="tab-rounds">
       <div id="roundNav" class="round-nav"></div>
       <div id="roundStatus" class="status-line">Todavía no hay rondas generadas.</div>
       <div id="matches"></div>
-      <div id="roundSummaryCard" class="summary-card" style="display:none;">
-        <div class="card-title">Resumen de la ronda</div>
-        <div id="roundSummaryList" class="summary-list"></div>
-      </div>
       <div class="btn-row">
         <button class="btn-primary" id="saveResultsBtn">💾 Guardar resultados</button>
         <button class="btn-blue" id="nextRoundBtn">▶ Siguiente ronda</button>
@@ -795,8 +859,45 @@
       </div>
 
       <div class="card">
-        <div class="card-title">Resumen general</div>
-        <div id="tournamentSummaryList" class="summary-list"></div>
+        <div class="card-title">Resumen del torneo</div>
+        <div id="globalSummary" class="summary-list"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-final">
+      <div class="card">
+        <div class="card-title">Clasificados provisionales</div>
+        <div id="qualifiedPlayers" class="qualified-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Cruces sugeridos</div>
+        <div id="finalBracket" class="final-list"></div>
+        <p class="small-note">
+          Cruces automáticos sugeridos según clasificación: 1º vs 8º, 2º vs 7º, 3º vs 6º, 4º vs 5º.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Siguientes fases</div>
+        <div class="phase-grid">
+          <div class="phase-box">
+            <h4>Cuartos de final</h4>
+            <div class="muted">8 clasificados · 4 partidos</div>
+          </div>
+          <div class="phase-box">
+            <h4>Semifinales</h4>
+            <div class="muted">4 clasificados · 2 partidos</div>
+          </div>
+          <div class="phase-box">
+            <h4>Tercer puesto</h4>
+            <div class="muted">Opcional entre los perdedores de semifinales</div>
+          </div>
+          <div class="phase-box">
+            <h4>Final</h4>
+            <div class="muted">Partido por el título</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -814,6 +915,7 @@
         </p>
       </div>
     </div>
+
   </main>
 
   <div id="toast"></div>
@@ -840,9 +942,6 @@
     roundNav: document.getElementById('roundNav'),
     roundStatus: document.getElementById('roundStatus'),
     matches: document.getElementById('matches'),
-    roundSummaryCard: document.getElementById('roundSummaryCard'),
-    roundSummaryList: document.getElementById('roundSummaryList'),
-    tournamentSummaryList: document.getElementById('tournamentSummaryList'),
     standingsBody: document.querySelector('#standingsTable tbody'),
     startBtn: document.getElementById('startBtn'),
     fillNamesBtn: document.getElementById('fillNamesBtn'),
@@ -852,7 +951,10 @@
     exportBtn: document.getElementById('exportBtn'),
     importBtn: document.getElementById('importBtn'),
     importInput: document.getElementById('importInput'),
-    newTournamentBtn: document.getElementById('newTournamentBtn')
+    newTournamentBtn: document.getElementById('newTournamentBtn'),
+    globalSummary: document.getElementById('globalSummary'),
+    qualifiedPlayers: document.getElementById('qualifiedPlayers'),
+    finalBracket: document.getElementById('finalBracket')
   };
 
   let toastTimer;
@@ -893,7 +995,9 @@
       .replaceAll("'",'&#39;');
   }
 
-  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
 
   function loadState() {
     try {
@@ -916,8 +1020,13 @@
     }
   }
 
-  function getPlayerById(id) { return state.players.find(p => p.id === id); }
-  function isMatchComplete(m) { return Number.isFinite(m.score1) && Number.isFinite(m.score2); }
+  function getPlayerById(id) {
+    return state.players.find(p => p.id === id);
+  }
+
+  function isMatchComplete(m) {
+    return Number.isFinite(m.score1) && Number.isFinite(m.score2);
+  }
 
   function currentRoundComplete() {
     if (!state.rounds.length) return false;
@@ -947,8 +1056,7 @@
       pe: 0,
       gf: 0,
       gc: 0,
-      dg: 0,
-      opponents: []
+      dg: 0
     }));
 
     const byId = Object.fromEntries(table.map(r => [r.id, r]));
@@ -958,25 +1066,36 @@
         const a = byId[m.p1];
         const b = byId[m.p2];
         if (!a || !b) continue;
-        a.opponents.push(b.name);
-        b.opponents.push(a.name);
         if (!isMatchComplete(m)) continue;
 
-        a.pj++; b.pj++;
-        a.gf += m.score1; a.gc += m.score2;
-        b.gf += m.score2; b.gc += m.score1;
+        a.pj++;
+        b.pj++;
+
+        a.gf += m.score1;
+        a.gc += m.score2;
+        b.gf += m.score2;
+        b.gc += m.score1;
 
         if (m.score1 > m.score2) {
-          a.g++; b.pe++; a.pts += 3;
+          a.g++;
+          b.pe++;
+          a.pts += 3;
         } else if (m.score1 < m.score2) {
-          b.g++; a.pe++; b.pts += 3;
+          b.g++;
+          a.pe++;
+          b.pts += 3;
         } else {
-          a.e++; b.e++; a.pts++; b.pts++;
+          a.e++;
+          b.e++;
+          a.pts++;
+          b.pts++;
         }
       }
     }
 
-    for (const r of table) r.dg = r.gf - r.gc;
+    for (const r of table) {
+      r.dg = r.gf - r.gc;
+    }
 
     table.sort((x, y) =>
       y.pts - x.pts ||
@@ -987,65 +1106,6 @@
     );
 
     return table;
-  }
-
-  function getMatchSummaryText(match) {
-    const p1 = getPlayerById(match.p1)?.name || '?';
-    const p2 = getPlayerById(match.p2)?.name || '?';
-
-    if (!isMatchComplete(match)) {
-      return `<strong>${escapeHtml(p1)}</strong> vs <strong>${escapeHtml(p2)}</strong> <span class="muted">(pendiente)</span>`;
-    }
-
-    if (match.score1 > match.score2) {
-      return `<strong>${escapeHtml(p1)}</strong> ${match.score1}-${match.score2} ${escapeHtml(p2)} <span class="muted">· ganó ${escapeHtml(p1)}</span>`;
-    }
-
-    if (match.score2 > match.score1) {
-      return `${escapeHtml(p1)} ${match.score1}-${match.score2} <strong>${escapeHtml(p2)}</strong> <span class="muted">· ganó ${escapeHtml(p2)}</span>`;
-    }
-
-    return `${escapeHtml(p1)} ${match.score1}-${match.score2} ${escapeHtml(p2)} <span class="muted">· empate</span>`;
-  }
-
-  function renderRoundSummary() {
-    if (!state.rounds.length) {
-      els.roundSummaryCard.style.display = 'none';
-      return;
-    }
-
-    const current = state.rounds[state.currentRoundIndex];
-    els.roundSummaryCard.style.display = 'block';
-
-    if (!current.matches.length) {
-      els.roundSummaryList.innerHTML = '<div class="summary-empty">Sin partidos en esta ronda.</div>';
-      return;
-    }
-
-    els.roundSummaryList.innerHTML = current.matches
-      .map(match => `<div class="summary-item">${getMatchSummaryText(match)}</div>`)
-      .join('');
-  }
-
-  function renderTournamentSummary() {
-    if (!state.rounds.length) {
-      els.tournamentSummaryList.innerHTML = '<div class="summary-empty">Todavía no hay partidos para resumir.</div>';
-      return;
-    }
-
-    const rows = [];
-    state.rounds.forEach((round, idx) => {
-      round.matches.forEach(match => {
-        rows.push(`
-          <div class="summary-item">
-            <span class="summary-round-tag">R${idx + 1}</span>
-            ${getMatchSummaryText(match)}
-          </div>
-        `);
-      });
-    });
-
-    els.tournamentSummaryList.innerHTML = rows.join('') || '<div class="summary-empty">Todavía no hay partidos para resumir.</div>';
   }
 
   function renderPlayers() {
@@ -1071,7 +1131,8 @@
           saveState();
           renderStandings();
           renderRounds();
-          renderTournamentSummary();
+          renderGlobalSummary();
+          renderFinalBracket();
         }
       });
     });
@@ -1094,7 +1155,7 @@
 
   function renderStandings() {
     const rows = computeStandings();
-    const rankClass = ['rank-1', 'rank-2', 'rank-3'];
+    const rankClass = ['rank-1','rank-2','rank-3'];
     els.standingsBody.innerHTML = rows.map((r, i) => `
       <tr class="${rankClass[i] || ''}">
         <td>${i + 1}</td>
@@ -1121,7 +1182,6 @@
           <span class="empty-icon">⚽</span>
           <p>Configura el torneo y pulsa<br><strong>Crear torneo · Ronda 1</strong></p>
         </div>`;
-      els.roundSummaryCard.style.display = 'none';
       return;
     }
 
@@ -1143,7 +1203,7 @@
     const total = current.matches.length;
     els.roundStatus.textContent = `Ronda ${state.currentRoundIndex + 1} · ${done}/${total} partidos completados`;
 
-    els.matches.innerHTML = current.matches.map((m, i) => {
+    let matchesHtml = current.matches.map((m, i) => {
       const p1 = getPlayerById(m.p1)?.name || '?';
       const p2 = getPlayerById(m.p2)?.name || '?';
       const complete = isMatchComplete(m);
@@ -1176,8 +1236,75 @@
       `;
     }).join('');
 
-    renderRoundSummary();
+    const summary = current.matches.map(m => {
+      const p1 = getPlayerById(m.p1)?.name || '?';
+      const p2 = getPlayerById(m.p2)?.name || '?';
+      if (!isMatchComplete(m)) return `<div class="summary-item">${escapeHtml(p1)} vs ${escapeHtml(p2)} <span class="muted">(pendiente)</span></div>`;
+      return `<div class="summary-item">${escapeHtml(p1)} <strong>${m.score1}-${m.score2}</strong> ${escapeHtml(p2)}</div>`;
+    }).join('');
+
+    matchesHtml += `
+      <div class="card">
+        <div class="card-title">Resumen de ronda</div>
+        <div class="summary-list">${summary}</div>
+      </div>
+    `;
+
+    els.matches.innerHTML = matchesHtml;
     updateNextRoundBtn();
+  }
+
+  function renderGlobalSummary() {
+    if (!state.rounds.length) {
+      els.globalSummary.innerHTML = `<div class="summary-item muted">Aún no hay partidos registrados.</div>`;
+      return;
+    }
+
+    let html = '';
+
+    state.rounds.forEach((round, i) => {
+      html += `<div class="summary-item"><strong>Ronda ${i + 1}</strong></div>`;
+      round.matches.forEach(m => {
+        const p1 = getPlayerById(m.p1)?.name || '?';
+        const p2 = getPlayerById(m.p2)?.name || '?';
+        if (isMatchComplete(m)) {
+          html += `<div class="summary-item">${escapeHtml(p1)} <strong>${m.score1}-${m.score2}</strong> ${escapeHtml(p2)}</div>`;
+        } else {
+          html += `<div class="summary-item">${escapeHtml(p1)} vs ${escapeHtml(p2)} <span class="muted">(pendiente)</span></div>`;
+        }
+      });
+    });
+
+    els.globalSummary.innerHTML = html;
+  }
+
+  function renderFinalBracket() {
+    const table = computeStandings();
+    const qualified = table.slice(0, Math.min(8, table.length));
+
+    if (!qualified.length) {
+      els.qualifiedPlayers.innerHTML = `<div class="qualified-item muted">Todavía no hay clasificación disponible.</div>`;
+      els.finalBracket.innerHTML = `<div class="final-item muted">Sin cruces todavía.</div>`;
+      return;
+    }
+
+    els.qualifiedPlayers.innerHTML = qualified.map((p, i) => `
+      <div class="qualified-item">${i + 1}º · ${escapeHtml(p.name)} · <strong>${p.pts} pts</strong> · DG ${p.dg >= 0 ? '+' + p.dg : p.dg}</div>
+    `).join('');
+
+    if (qualified.length < 8) {
+      els.finalBracket.innerHTML = `<div class="final-item muted">Se necesitan al menos 8 jugadores para generar cruces Top 8.</div>`;
+      return;
+    }
+
+    const html = [
+      `1º ${qualified[0].name} vs 8º ${qualified[7].name}`,
+      `2º ${qualified[1].name} vs 7º ${qualified[6].name}`,
+      `3º ${qualified[2].name} vs 6º ${qualified[5].name}`,
+      `4º ${qualified[3].name} vs 5º ${qualified[4].name}`
+    ].map(line => `<div class="final-item">${escapeHtml(line)}</div>`).join('');
+
+    els.finalBracket.innerHTML = html;
   }
 
   function updateNextRoundBtn() {
@@ -1202,7 +1329,13 @@
     const shuffled = shuffle(state.players.map(p => p.id));
     const matches = [];
     for (let i = 0; i < shuffled.length; i += 2) {
-      matches.push({ id: uid(), p1: shuffled[i], p2: shuffled[i + 1], score1: null, score2: null });
+      matches.push({
+        id: uid(),
+        p1: shuffled[i],
+        p2: shuffled[i + 1],
+        score1: null,
+        score2: null
+      });
     }
     return { id: uid(), matches };
   }
@@ -1227,6 +1360,7 @@
       if (!remaining.length) return [];
       const a = remaining[0];
       const rest = remaining.slice(1);
+
       for (const b of sortCandidates(rest, a)) {
         const sub = backtrack(rest.filter(id => id !== b));
         if (sub) return [[a, b], ...sub];
@@ -1256,7 +1390,13 @@
 
     return {
       id: uid(),
-      matches: pairings.map(([p1, p2]) => ({ id: uid(), p1, p2, score1: null, score2: null }))
+      matches: pairings.map(([p1, p2]) => ({
+        id: uid(),
+        p1,
+        p2,
+        score1: null,
+        score2: null
+      }))
     };
   }
 
@@ -1268,10 +1408,14 @@
 
   function generateNextRound() {
     if (!canGenerateNextRound()) {
-      if (state.rounds.length >= state.roundCount) showToast('Ya se generaron todas las rondas', 'error');
-      else showToast('Completa todos los resultados primero', 'error');
+      if (state.rounds.length >= state.roundCount) {
+        showToast('Ya se generaron todas las rondas', 'error');
+      } else {
+        showToast('Completa todos los resultados primero', 'error');
+      }
       return;
     }
+
     const next = swissPairNextRound();
     state.rounds.push(next);
     state.currentRoundIndex = state.rounds.length - 1;
@@ -1284,14 +1428,17 @@
   function startTournament() {
     updateConfigFromInputs();
     ensurePlayers();
+
     if (state.players.some(p => !p.name.trim())) {
       showToast('Todos los jugadores necesitan nombre', 'error');
       return;
     }
+
     if (state.players.length % 2 !== 0) {
       showToast('Se necesita número par de jugadores', 'error');
       return;
     }
+
     state.started = true;
     state.rounds = [createRoundOne()];
     state.currentRoundIndex = 0;
@@ -1321,7 +1468,8 @@
     renderPlayers();
     renderRounds();
     renderStandings();
-    renderTournamentSummary();
+    renderGlobalSummary();
+    renderFinalBracket();
     updateNextRoundBtn();
     saveState();
   }
@@ -1361,11 +1509,15 @@
     syncConfigInputs();
     saveState();
     renderPlayers();
+    renderStandings();
+    renderGlobalSummary();
+    renderFinalBracket();
     showToast('14 nombres cargados', 'info');
     document.querySelector('[data-tab="players"]').click();
   }
 
   els.tournamentName.addEventListener('input', updateConfigFromInputs);
+
   els.playerCount.addEventListener('change', () => {
     if (state.started) {
       syncConfigInputs();
@@ -1374,10 +1526,18 @@
     }
     updateConfigFromInputs();
     renderPlayers();
+    renderStandings();
+    renderGlobalSummary();
+    renderFinalBracket();
   });
-  els.roundCount.addEventListener('change', () => { updateConfigFromInputs(); renderAll(); });
+
+  els.roundCount.addEventListener('change', () => {
+    updateConfigFromInputs();
+    renderAll();
+  });
 
   els.fillNamesBtn.addEventListener('click', fillQuickNames);
+
   els.resetPlayersBtn.addEventListener('click', () => {
     if (state.started) {
       showToast('Torneo ya iniciado', 'error');
@@ -1388,12 +1548,17 @@
     ensurePlayers();
     saveState();
     renderPlayers();
+    renderStandings();
+    renderGlobalSummary();
+    renderFinalBracket();
     showToast('Lista regenerada', 'info');
   });
+
   els.startBtn.addEventListener('click', () => {
     if (state.started && !confirm('Ya hay un torneo. ¿Empezar de nuevo?')) return;
     startTournament();
   });
+
   els.saveResultsBtn.addEventListener('click', () => {
     if (!state.rounds.length) {
       showToast('Primero crea el torneo', 'error');
@@ -1404,17 +1569,21 @@
     renderAll();
     showToast('Resultados guardados ✓', 'success');
   });
+
   els.nextRoundBtn.addEventListener('click', () => {
     updateCurrentRoundScoresFromUI();
     generateNextRound();
   });
+
   els.exportBtn.addEventListener('click', exportJSON);
   els.importBtn.addEventListener('click', () => els.importInput.click());
+
   els.importInput.addEventListener('change', e => {
     const file = e.target.files?.[0];
     if (file) importJSON(file);
     e.target.value = '';
   });
+
   els.newTournamentBtn.addEventListener('click', () => {
     if (!confirm('Se borrará todo el torneo actual. ¿Continuar?')) return;
     state.name = '';
