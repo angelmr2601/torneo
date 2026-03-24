@@ -454,6 +454,31 @@
         padding: 14px;
       }
     }
+
+    .qualifies-row {
+      background: rgba(5, 150, 105, 0.10);
+    }
+
+    .qualifies-row td {
+      border-bottom-color: rgba(5, 150, 105, 0.25);
+    }
+
+    .cutoff-row td {
+      border-bottom: 3px solid var(--success);
+    }
+
+    .qualifies-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 8px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(5, 150, 105, 0.12);
+      color: var(--success);
+      font-size: 11px;
+      font-weight: 800;
+      vertical-align: middle;
+    }
   </style>
 </head>
 
@@ -612,262 +637,285 @@
       </div>
     </section>
 
-  <script>
-    const STORAGE_KEY = 'pes6-swiss-html-v3-mobile';
+    <script>
+      const STORAGE_KEY = 'pes6-swiss-html-v3-mobile';
 
-    function uid() {
-      return Math.random().toString(36).slice(2, 10);
-    }
-
-    function getInitialPlayers() {
-      return Array.from({ length: 14 }, (_, i) => ({ id: uid(), name: `Jugador ${i + 1}` }));
-    }
-
-    function getInitialState() {
-      return {
-        ui: {
-          selectedSwissRound: 1,
-        },
-        config: {
-          tournamentName: 'Torneo PES6',
-          swissRounds: 4,
-          knockoutSize: 8,
-        },
-        players: getInitialPlayers(),
-        rounds: [],
-        knockout: null,
-      };
-    }
-
-    let state = loadState();
-
-    function loadState() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? JSON.parse(saved) : getInitialState();
-      } catch {
-        return getInitialState();
+      function uid() {
+        return Math.random().toString(36).slice(2, 10);
       }
-    }
 
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
+      function getInitialPlayers() {
+        return Array.from({ length: 14 }, (_, i) => ({ id: uid(), name: `Jugador ${i + 1}` }));
+      }
 
-    function playerMap() {
-      return new Map(state.players.map(p => [p.id, p]));
-    }
+      function getInitialState() {
+        return {
+          ui: {
+            selectedSwissRound: 1,
+          },
+          config: {
+            tournamentName: 'Torneo PES6',
+            swissRounds: 4,
+            knockoutSize: 8,
+          },
+          players: getInitialPlayers(),
+          rounds: [],
+          knockout: null,
+        };
+      }
 
-    function emptyStanding(player) {
-      return {
-        id: player.id,
-        name: player.name,
-        played: 0,
-        wins: 0,
-        draws: 0,
-        losses: 0,
-        gf: 0,
-        ga: 0,
-        gd: 0,
-        points: 0,
-        buchholz: 0,
-        opponents: [],
-        hadBye: false,
-      };
-    }
+      let state = loadState();
 
-    function sortStandings(list) {
-      return [...list].sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        if (b.buchholz !== a.buchholz) return b.buchholz - a.buchholz;
-        if (b.gd !== a.gd) return b.gd - a.gd;
-        if (b.gf !== a.gf) return b.gf - a.gf;
-        return a.name.localeCompare(b.name, 'es');
-      });
-    }
+      function loadState() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          return saved ? JSON.parse(saved) : getInitialState();
+        } catch {
+          return getInitialState();
+        }
+      }
 
-    function computeStandings() {
-      const map = new Map(state.players.map(p => [p.id, emptyStanding(p)]));
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
 
-      state.rounds.forEach(round => {
-        round.matches.forEach(match => {
-          if (match.bye) {
+      function playerMap() {
+        return new Map(state.players.map(p => [p.id, p]));
+      }
+
+      function emptyStanding(player) {
+        return {
+          id: player.id,
+          name: player.name,
+          played: 0,
+          wins: 0,
+          draws: 0,
+          losses: 0,
+          gf: 0,
+          ga: 0,
+          gd: 0,
+          points: 0,
+          buchholz: 0,
+          opponents: [],
+          hadBye: false,
+        };
+      }
+
+      function sortStandings(list) {
+        return [...list].sort((a, b) => {
+          if (b.points !== a.points) return b.points - a.points;
+          if (b.buchholz !== a.buchholz) return b.buchholz - a.buchholz;
+          if (b.gd !== a.gd) return b.gd - a.gd;
+          if (b.gf !== a.gf) return b.gf - a.gf;
+          return a.name.localeCompare(b.name, 'es');
+        });
+      }
+
+      function computeStandings() {
+        const map = new Map(state.players.map(p => [p.id, emptyStanding(p)]));
+
+        state.rounds.forEach(round => {
+          round.matches.forEach(match => {
+            if (match.bye) {
+              if (!match.played) return;
+              const st = map.get(match.player1Id);
+              st.played += 1;
+              st.wins += 1;
+              st.points += 3;
+              st.hadBye = true;
+              return;
+            }
+
             if (!match.played) return;
-            const st = map.get(match.player1Id);
-            st.played += 1;
-            st.wins += 1;
-            st.points += 3;
-            st.hadBye = true;
-            return;
-          }
+            const a = map.get(match.player1Id);
+            const b = map.get(match.player2Id);
+            const s1 = Number(match.score1 || 0);
+            const s2 = Number(match.score2 || 0);
 
-          if (!match.played) return;
-          const a = map.get(match.player1Id);
-          const b = map.get(match.player2Id);
-          const s1 = Number(match.score1 || 0);
-          const s2 = Number(match.score2 || 0);
+            a.played += 1;
+            b.played += 1;
+            a.gf += s1; a.ga += s2;
+            b.gf += s2; b.ga += s1;
+            a.opponents.push(match.player2Id);
+            b.opponents.push(match.player1Id);
 
-          a.played += 1;
-          b.played += 1;
-          a.gf += s1; a.ga += s2;
-          b.gf += s2; b.ga += s1;
-          a.opponents.push(match.player2Id);
-          b.opponents.push(match.player1Id);
-
-          if (s1 > s2) {
-            a.wins += 1; a.points += 3; b.losses += 1;
-          } else if (s2 > s1) {
-            b.wins += 1; b.points += 3; a.losses += 1;
-          } else {
-            a.draws += 1; b.draws += 1; a.points += 1; b.points += 1;
-          }
+            if (s1 > s2) {
+              a.wins += 1; a.points += 3; b.losses += 1;
+            } else if (s2 > s1) {
+              b.wins += 1; b.points += 3; a.losses += 1;
+            } else {
+              a.draws += 1; b.draws += 1; a.points += 1; b.points += 1;
+            }
+          });
         });
-      });
 
-      for (const st of map.values()) {
-        st.gd = st.gf - st.ga;
-        st.buchholz = st.opponents.reduce((sum, oppId) => sum + (map.get(oppId)?.points || 0), 0);
-      }
-
-      return sortStandings([...map.values()]);
-    }
-
-    function havePlayedTogether(aId, bId) {
-      return state.rounds.some(round => round.matches.some(m => !m.bye && (
-        (m.player1Id === aId && m.player2Id === bId) ||
-        (m.player1Id === bId && m.player2Id === aId)
-      )));
-    }
-
-    function generateSwissPairings() {
-      const standings = computeStandings();
-      let pool = [...standings];
-      const matches = [];
-
-      if (pool.length % 2 === 1) {
-        let byePlayer = [...pool].reverse().find(p => !p.hadBye) || pool[pool.length - 1];
-        pool = pool.filter(p => p.id !== byePlayer.id);
-        matches.push({
-          id: uid(),
-          player1Id: byePlayer.id,
-          player2Id: null,
-          score1: 1,
-          score2: 0,
-          played: true,
-          bye: true,
-        });
-      }
-
-      const used = new Set();
-      for (let i = 0; i < pool.length; i++) {
-        const a = pool[i];
-        if (used.has(a.id)) continue;
-
-        let opponent = null;
-        for (let j = i + 1; j < pool.length; j++) {
-          const b = pool[j];
-          if (used.has(b.id)) continue;
-          if (!havePlayedTogether(a.id, b.id)) {
-            opponent = b;
-            break;
-          }
+        for (const st of map.values()) {
+          st.gd = st.gf - st.ga;
+          st.buchholz = st.opponents.reduce((sum, oppId) => sum + (map.get(oppId)?.points || 0), 0);
         }
 
-        if (!opponent) {
+        return sortStandings([...map.values()]);
+      }
+
+      function havePlayedTogether(aId, bId) {
+        return state.rounds.some(round => round.matches.some(m => !m.bye && (
+          (m.player1Id === aId && m.player2Id === bId) ||
+          (m.player1Id === bId && m.player2Id === aId)
+        )));
+      }
+
+      function generateSwissPairings() {
+        const standings = computeStandings();
+        let pool = [...standings];
+        const matches = [];
+
+        if (pool.length % 2 === 1) {
+          let byePlayer = [...pool].reverse().find(p => !p.hadBye) || pool[pool.length - 1];
+          pool = pool.filter(p => p.id !== byePlayer.id);
+          matches.push({
+            id: uid(),
+            player1Id: byePlayer.id,
+            player2Id: null,
+            score1: 1,
+            score2: 0,
+            played: true,
+            bye: true,
+          });
+        }
+
+        const used = new Set();
+        for (let i = 0; i < pool.length; i++) {
+          const a = pool[i];
+          if (used.has(a.id)) continue;
+
+          let opponent = null;
           for (let j = i + 1; j < pool.length; j++) {
             const b = pool[j];
-            if (!used.has(b.id)) {
+            if (used.has(b.id)) continue;
+            if (!havePlayedTogether(a.id, b.id)) {
               opponent = b;
               break;
             }
           }
+
+          if (!opponent) {
+            for (let j = i + 1; j < pool.length; j++) {
+              const b = pool[j];
+              if (!used.has(b.id)) {
+                opponent = b;
+                break;
+              }
+            }
+          }
+
+          if (opponent) {
+            used.add(a.id);
+            used.add(opponent.id);
+            matches.push({
+              id: uid(),
+              player1Id: a.id,
+              player2Id: opponent.id,
+              score1: '',
+              score2: '',
+              played: false,
+              bye: false,
+            });
+          }
         }
 
-        if (opponent) {
-          used.add(a.id);
-          used.add(opponent.id);
-          matches.push({
-            id: uid(),
-            player1Id: a.id,
-            player2Id: opponent.id,
-            score1: '',
-            score2: '',
-            played: false,
-            bye: false,
-          });
-        }
+        return {
+          roundNumber: state.rounds.length + 1,
+          matches,
+        };
       }
 
-      return {
-        roundNumber: state.rounds.length + 1,
-        matches,
-      };
-    }
+      function seedKnockout() {
+        const standings = computeStandings();
+        const size = Number(state.config.knockoutSize);
+        const qualified = standings.slice(0, size);
 
-    function seedKnockout() {
-      const standings = computeStandings();
-      const size = Number(state.config.knockoutSize);
-      const qualified = standings.slice(0, size);
+        if (size === 4) {
+          return {
+            qualified,
+            rounds: [
+              {
+                name: 'Semifinales',
+                matches: [
+                  { id: uid(), player1Id: qualified[0]?.id || null, player2Id: qualified[3]?.id || null, score1: '', score2: '', played: false },
+                  { id: uid(), player1Id: qualified[1]?.id || null, player2Id: qualified[2]?.id || null, score1: '', score2: '', played: false },
+                ],
+              },
+              { name: 'Final', matches: [] },
+              { name: '3º puesto', matches: [] },
+            ],
+          };
+        }
 
-      if (size === 4) {
         return {
           qualified,
           rounds: [
             {
-              name: 'Semifinales',
+              name: 'Cuartos',
               matches: [
-                { id: uid(), player1Id: qualified[0]?.id || null, player2Id: qualified[3]?.id || null, score1: '', score2: '', played: false },
-                { id: uid(), player1Id: qualified[1]?.id || null, player2Id: qualified[2]?.id || null, score1: '', score2: '', played: false },
+                { id: uid(), player1Id: qualified[0]?.id || null, player2Id: qualified[7]?.id || null, score1: '', score2: '', played: false },
+                { id: uid(), player1Id: qualified[1]?.id || null, player2Id: qualified[6]?.id || null, score1: '', score2: '', played: false },
+                { id: uid(), player1Id: qualified[2]?.id || null, player2Id: qualified[5]?.id || null, score1: '', score2: '', played: false },
+                { id: uid(), player1Id: qualified[3]?.id || null, player2Id: qualified[4]?.id || null, score1: '', score2: '', played: false },
               ],
             },
+            { name: 'Semifinales', matches: [] },
             { name: 'Final', matches: [] },
             { name: '3º puesto', matches: [] },
           ],
         };
       }
 
-      return {
-        qualified,
-        rounds: [
-          {
-            name: 'Cuartos',
-            matches: [
-              { id: uid(), player1Id: qualified[0]?.id || null, player2Id: qualified[7]?.id || null, score1: '', score2: '', played: false },
-              { id: uid(), player1Id: qualified[1]?.id || null, player2Id: qualified[6]?.id || null, score1: '', score2: '', played: false },
-              { id: uid(), player1Id: qualified[2]?.id || null, player2Id: qualified[5]?.id || null, score1: '', score2: '', played: false },
-              { id: uid(), player1Id: qualified[3]?.id || null, player2Id: qualified[4]?.id || null, score1: '', score2: '', played: false },
-            ],
-          },
-          { name: 'Semifinales', matches: [] },
-          { name: 'Final', matches: [] },
-          { name: '3º puesto', matches: [] },
-        ],
-      };
-    }
+      function getMatchWinner(match) {
+        if (!match || !match.played) return null;
+        const s1 = Number(match.score1);
+        const s2 = Number(match.score2);
+        if (s1 === s2) return null;
+        return s1 > s2 ? match.player1Id : match.player2Id;
+      }
 
-    function getMatchWinner(match) {
-      if (!match || !match.played) return null;
-      const s1 = Number(match.score1);
-      const s2 = Number(match.score2);
-      if (s1 === s2) return null;
-      return s1 > s2 ? match.player1Id : match.player2Id;
-    }
+      function getMatchLoser(match) {
+        if (!match || !match.played) return null;
+        const s1 = Number(match.score1);
+        const s2 = Number(match.score2);
+        if (s1 === s2) return null;
+        return s1 > s2 ? match.player2Id : match.player1Id;
+      }
 
-    function getMatchLoser(match) {
-      if (!match || !match.played) return null;
-      const s1 = Number(match.score1);
-      const s2 = Number(match.score2);
-      if (s1 === s2) return null;
-      return s1 > s2 ? match.player2Id : match.player1Id;
-    }
+      function advanceKnockout() {
+        if (!state.knockout) return;
+        const rounds = state.knockout.rounds;
+        const size = Number(state.config.knockoutSize);
 
-    function advanceKnockout() {
-      if (!state.knockout) return;
-      const rounds = state.knockout.rounds;
-      const size = Number(state.config.knockoutSize);
+        if (size === 4) {
+          const [sf, finalRound, thirdRound] = rounds;
+          if (sf.matches.length && sf.matches.every(m => getMatchWinner(m))) {
+            const winners = sf.matches.map(getMatchWinner);
+            const losers = sf.matches.map(getMatchLoser);
+            if (!finalRound.matches.length) {
+              finalRound.matches = [{ id: uid(), player1Id: winners[0], player2Id: winners[1], score1: '', score2: '', played: false }];
+            }
+            if (!thirdRound.matches.length) {
+              thirdRound.matches = [{ id: uid(), player1Id: losers[0], player2Id: losers[1], score1: '', score2: '', played: false }];
+            }
+          }
+          return;
+        }
 
-      if (size === 4) {
-        const [sf, finalRound, thirdRound] = rounds;
+        const [qf, sf, finalRound, thirdRound] = rounds;
+        if (qf.matches.length && qf.matches.every(m => getMatchWinner(m))) {
+          const winners = qf.matches.map(getMatchWinner);
+          if (!sf.matches.length) {
+            sf.matches = [
+              { id: uid(), player1Id: winners[0], player2Id: winners[3], score1: '', score2: '', played: false },
+              { id: uid(), player1Id: winners[1], player2Id: winners[2], score1: '', score2: '', played: false },
+            ];
+          }
+        }
         if (sf.matches.length && sf.matches.every(m => getMatchWinner(m))) {
           const winners = sf.matches.map(getMatchWinner);
           const losers = sf.matches.map(getMatchLoser);
@@ -878,131 +926,108 @@
             thirdRound.matches = [{ id: uid(), player1Id: losers[0], player2Id: losers[1], score1: '', score2: '', played: false }];
           }
         }
-        return;
       }
 
-      const [qf, sf, finalRound, thirdRound] = rounds;
-      if (qf.matches.length && qf.matches.every(m => getMatchWinner(m))) {
-        const winners = qf.matches.map(getMatchWinner);
-        if (!sf.matches.length) {
-          sf.matches = [
-            { id: uid(), player1Id: winners[0], player2Id: winners[3], score1: '', score2: '', played: false },
-            { id: uid(), player1Id: winners[1], player2Id: winners[2], score1: '', score2: '', played: false },
-          ];
-        }
+      function isSwissFinished() {
+        return state.rounds.length >= Number(state.config.swissRounds) && state.rounds.every(r => r.matches.every(m => m.played));
       }
-      if (sf.matches.length && sf.matches.every(m => getMatchWinner(m))) {
-        const winners = sf.matches.map(getMatchWinner);
-        const losers = sf.matches.map(getMatchLoser);
-        if (!finalRound.matches.length) {
-          finalRound.matches = [{ id: uid(), player1Id: winners[0], player2Id: winners[1], score1: '', score2: '', played: false }];
-        }
-        if (!thirdRound.matches.length) {
-          thirdRound.matches = [{ id: uid(), player1Id: losers[0], player2Id: losers[1], score1: '', score2: '', played: false }];
-        }
+
+      function currentRoundComplete() {
+        if (!state.rounds.length) return true;
+        const round = state.rounds[state.rounds.length - 1];
+        return round.matches.every(m => m.played);
       }
-    }
 
-    function isSwissFinished() {
-      return state.rounds.length >= Number(state.config.swissRounds) && state.rounds.every(r => r.matches.every(m => m.played));
-    }
+      function playerName(id) {
+        return playerMap().get(id)?.name || '—';
+      }
 
-    function currentRoundComplete() {
-      if (!state.rounds.length) return true;
-      const round = state.rounds[state.rounds.length - 1];
-      return round.matches.every(m => m.played);
-    }
+      function render() {
+        saveState();
+        renderHeader();
+        renderConfig();
+        renderPlayers();
+        renderRounds();
+        renderStandings();
+        renderKnockout();
+        renderSummary();
+      }
 
-    function playerName(id) {
-      return playerMap().get(id)?.name || '—';
-    }
+      function renderHeader() {
+        document.getElementById('title').textContent = state.config.tournamentName;
+        document.getElementById('roundCounter').textContent = `Rondas creadas: ${state.rounds.length} / ${state.config.swissRounds}`;
+      }
 
-    function render() {
-      saveState();
-      renderHeader();
-      renderConfig();
-      renderPlayers();
-      renderRounds();
-      renderStandings();
-      renderKnockout();
-      renderSummary();
-    }
+      function renderConfig() {
+        document.getElementById('tournamentName').value = state.config.tournamentName;
+        document.getElementById('swissRounds').value = String(state.config.swissRounds);
+        document.getElementById('knockoutSize').value = String(state.config.knockoutSize);
+      }
 
-    function renderHeader() {
-      document.getElementById('title').textContent = state.config.tournamentName;
-      document.getElementById('roundCounter').textContent = `Rondas creadas: ${state.rounds.length} / ${state.config.swissRounds}`;
-    }
+      function renderPlayers() {
+        const wrap = document.getElementById('playersList');
+        const locked = state.rounds.length > 0;
+        document.getElementById('playerCount').textContent = state.players.length;
+        document.getElementById('playersLockMsg').classList.toggle('hidden', !locked);
 
-    function renderConfig() {
-      document.getElementById('tournamentName').value = state.config.tournamentName;
-      document.getElementById('swissRounds').value = String(state.config.swissRounds);
-      document.getElementById('knockoutSize').value = String(state.config.knockoutSize);
-    }
-
-    function renderPlayers() {
-      const wrap = document.getElementById('playersList');
-      const locked = state.rounds.length > 0;
-      document.getElementById('playerCount').textContent = state.players.length;
-      document.getElementById('playersLockMsg').classList.toggle('hidden', !locked);
-
-      wrap.innerHTML = state.players.map(p => `
+        wrap.innerHTML = state.players.map(p => `
         <div class="player-row">
           <input value="${escapeHtml(p.name)}" data-player-input="${p.id}" />
           <button class="btn" data-remove-player="${p.id}" ${locked ? 'disabled' : ''}>Borrar</button>
         </div>
       `).join('');
-    }
+      }
 
-    function renderRounds() {
-  const container = document.getElementById('roundsContainer');
-  const btn = document.getElementById('nextRoundBtn');
-  const msg = document.getElementById('nextRoundMsg');
-  const selector = document.getElementById('roundSelector');
+      function renderRounds() {
+        const container = document.getElementById('roundsContainer');
+        const btn = document.getElementById('nextRoundBtn');
+        const msg = document.getElementById('nextRoundMsg');
+        const selector = document.getElementById('roundSelector');
 
-  const canGenerate =
-    currentRoundComplete() &&
-    state.rounds.length < Number(state.config.swissRounds) &&
-    state.players.length >= 4;
+        const canGenerate =
+          currentRoundComplete() &&
+          state.rounds.length < Number(state.config.swissRounds) &&
+          state.players.length >= 4;
 
-  btn.disabled = !canGenerate;
+        btn.disabled = !canGenerate;
 
-  if (state.rounds.length === 0) {
-    msg.textContent = 'Todavía no hay rondas creadas.';
-  } else if (!currentRoundComplete()) {
-    msg.textContent = 'Termina la ronda actual para generar la siguiente.';
-  } else if (state.rounds.length >= Number(state.config.swissRounds)) {
-    msg.textContent = 'Ya se han creado todas las rondas.';
-  } else {
-    msg.textContent = 'Puedes generar la siguiente ronda.';
-  }
+        if (state.rounds.length === 0) {
+          msg.textContent = 'Todavía no hay rondas creadas.';
+        } else if (!currentRoundComplete()) {
+          msg.textContent = 'Termina la ronda actual para generar la siguiente.';
+        } else if (state.rounds.length >= Number(state.config.swissRounds)) {
+          msg.textContent = 'Ya se han creado todas las rondas.';
+        } else {
+          msg.textContent = 'Puedes generar la siguiente ronda.';
+        }
 
-  if (!state.rounds.length) {
-    selector.innerHTML = '<option value="">Sin rondas</option>';
-    selector.disabled = true;
-    container.innerHTML = '';
-    return;
-  }
+        if (!state.rounds.length) {
+          selector.innerHTML = '<option value="">Sin rondas</option>';
+          selector.disabled = true;
+          container.innerHTML = '';
+          return;
+        }
 
-  selector.disabled = false;
+        selector.disabled = false;
 
-  if (!state.ui) state.ui = {};
-  if (!state.ui.selectedSwissRound || state.ui.selectedSwissRound > state.rounds.length) {
-    state.ui.selectedSwissRound = state.rounds.length;
-  }
+        if (!state.ui) state.ui = {};
+        if (!state.ui.selectedSwissRound || state.ui.selectedSwissRound > state.rounds.length) {
+          state.ui.selectedSwissRound = state.rounds.length;
+        }
 
-  selector.innerHTML = state.rounds
-    .map(r => `<option value="${r.roundNumber}">Ronda ${r.roundNumber}</option>`)
-    .join('');
+        selector.innerHTML = state.rounds
+          .map(r => `<option value="${r.roundNumber}">Ronda ${r.roundNumber}</option>`)
+          .join('');
 
-  selector.value = String(state.ui.selectedSwissRound);
+        selector.value = String(state.ui.selectedSwissRound);
 
-  const round =
-    state.rounds.find(r => r.roundNumber === Number(state.ui.selectedSwissRound)) ||
-    state.rounds[state.rounds.length - 1];
+        const round =
+          state.rounds.find(r => r.roundNumber === Number(state.ui.selectedSwissRound)) ||
+          state.rounds[state.rounds.length - 1];
 
-  const ri = state.rounds.findIndex(r => r.roundNumber === round.roundNumber);
+        const ri = state.rounds.findIndex(r => r.roundNumber === round.roundNumber);
 
-  container.innerHTML = `
+        container.innerHTML = `
     <div class="card">
       <div class="section-head">
         <h3>Ronda ${round.roundNumber}</h3>
@@ -1065,45 +1090,55 @@
       </div>
     </div>
   `;
-}
-
-    function renderStandings() {
-      const standings = computeStandings();
-      const body = document.getElementById('standingsBody');
-      body.innerHTML = standings.map((s, i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${escapeHtml(s.name)}</td>
-          <td><strong>${s.points}</strong></td>
-          <td>${s.played}</td>
-          <td>${s.wins}</td>
-          <td>${s.draws}</td>
-          <td>${s.losses}</td>
-          <td>${s.gf}</td>
-          <td>${s.ga}</td>
-          <td>${s.gd}</td>
-          <td>${s.buchholz}</td>
-        </tr>
-      `).join('');
-    }
-
-    function renderKnockout() {
-      const btn = document.getElementById('generateKnockoutBtn');
-      const msg = document.getElementById('knockoutMsg');
-      const box = document.getElementById('knockoutContainer');
-
-      btn.disabled = !isSwissFinished() || !!state.knockout;
-
-      if (!isSwissFinished()) msg.textContent = 'Las eliminatorias se desbloquean cuando terminen todas las rondas suizas.';
-      else if (state.knockout) msg.textContent = 'El cuadro eliminatorio ya está creado.';
-      else msg.textContent = 'Ya puedes generar el cuadro eliminatorio.';
-
-      if (!state.knockout) {
-        box.innerHTML = '';
-        return;
       }
 
-      box.innerHTML = `
+      function renderStandings() {
+        const standings = computeStandings();
+        const body = document.getElementById('standingsBody');
+        const koSize = Number(state.config.knockoutSize);
+
+        body.innerHTML = standings.map((s, i) => {
+          const qualifies = i < koSize;
+          const isCutoff = i === koSize - 1;
+
+          return `
+      <tr class="${qualifies ? 'qualifies-row' : ''} ${isCutoff ? 'cutoff-row' : ''}">
+        <td>${i + 1}</td>
+        <td>
+          ${escapeHtml(s.name)}
+          ${qualifies ? '<span class="qualifies-badge">KO</span>' : ''}
+        </td>
+        <td><strong>${s.points}</strong></td>
+        <td>${s.played}</td>
+        <td>${s.wins}</td>
+        <td>${s.draws}</td>
+        <td>${s.losses}</td>
+        <td>${s.gf}</td>
+        <td>${s.ga}</td>
+        <td>${s.gd}</td>
+        <td>${s.buchholz}</td>
+      </tr>
+    `;
+        }).join('');
+      }
+
+      function renderKnockout() {
+        const btn = document.getElementById('generateKnockoutBtn');
+        const msg = document.getElementById('knockoutMsg');
+        const box = document.getElementById('knockoutContainer');
+
+        btn.disabled = !isSwissFinished() || !!state.knockout;
+
+        if (!isSwissFinished()) msg.textContent = 'Las eliminatorias se desbloquean cuando terminen todas las rondas suizas.';
+        else if (state.knockout) msg.textContent = 'El cuadro eliminatorio ya está creado.';
+        else msg.textContent = 'Ya puedes generar el cuadro eliminatorio.';
+
+        if (!state.knockout) {
+          box.innerHTML = '';
+          return;
+        }
+
+        box.innerHTML = `
         <div class="card" style="margin-bottom: 16px; padding: 14px;">
           <h3>Clasificados</h3>
           <div class="qualified-list" style="margin-top: 12px;">
@@ -1146,34 +1181,34 @@
           </div>
         `).join('')}
       `;
-    }
+      }
 
-    function renderSummary() {
-      const standings = computeStandings();
-      const pending = document.getElementById('pendingMatches');
-      const topList = document.getElementById('topList');
-      const podiumCard = document.getElementById('podiumCard');
-      const podiumList = document.getElementById('podiumList');
+      function renderSummary() {
+        const standings = computeStandings();
+        const pending = document.getElementById('pendingMatches');
+        const topList = document.getElementById('topList');
+        const podiumCard = document.getElementById('podiumCard');
+        const podiumList = document.getElementById('podiumList');
 
-      const swissPending = state.rounds.length
-        ? state.rounds[state.rounds.length - 1].matches.filter(m => !m.played && !m.bye).map(m => ({
-          label: `Ronda ${state.rounds[state.rounds.length - 1].roundNumber}`,
-          p1: playerName(m.player1Id),
-          p2: playerName(m.player2Id),
-        }))
-        : [];
+        const swissPending = state.rounds.length
+          ? state.rounds[state.rounds.length - 1].matches.filter(m => !m.played && !m.bye).map(m => ({
+            label: `Ronda ${state.rounds[state.rounds.length - 1].roundNumber}`,
+            p1: playerName(m.player1Id),
+            p2: playerName(m.player2Id),
+          }))
+          : [];
 
-      const koPending = state.knockout
-        ? state.knockout.rounds.flatMap(round => round.matches.filter(m => !m.played).map(m => ({
-          label: round.name,
-          p1: playerName(m.player1Id),
-          p2: playerName(m.player2Id),
-        })))
-        : [];
+        const koPending = state.knockout
+          ? state.knockout.rounds.flatMap(round => round.matches.filter(m => !m.played).map(m => ({
+            label: round.name,
+            p1: playerName(m.player1Id),
+            p2: playerName(m.player2Id),
+          })))
+          : [];
 
-      const items = swissPending.length ? swissPending : koPending;
+        const items = swissPending.length ? swissPending : koPending;
 
-      pending.innerHTML = items.length ? items.map(m => `
+        pending.innerHTML = items.length ? items.map(m => `
         <div class="summary-row">
           <div>
             <div class="muted" style="font-size:12px;">${escapeHtml(m.label)}</div>
@@ -1182,7 +1217,7 @@
         </div>
       `).join('') : '<div class="empty">No hay partidos pendientes.</div>';
 
-      topList.innerHTML = standings.slice(0, 5).map((s, i) => `
+        topList.innerHTML = standings.slice(0, 5).map((s, i) => `
         <div class="summary-row">
           <div>
             <div class="muted" style="font-size:12px;">#${i + 1}</div>
@@ -1192,30 +1227,39 @@
         </div>
       `).join('');
 
-      const podium = getPodium();
-      if (!podium) {
-        podiumCard.style.display = 'none';
-      } else {
-        podiumCard.style.display = 'block';
-        podiumList.innerHTML = [
-          { label: 'Campeón', name: playerName(podium.champion) },
-          { label: 'Subcampeón', name: playerName(podium.runnerUp) },
-          { label: 'Tercero', name: podium.third ? playerName(podium.third) : '—' },
-        ].map(item => `
+        const podium = getPodium();
+        if (!podium) {
+          podiumCard.style.display = 'none';
+        } else {
+          podiumCard.style.display = 'block';
+          podiumList.innerHTML = [
+            { label: 'Campeón', name: playerName(podium.champion) },
+            { label: 'Subcampeón', name: playerName(podium.runnerUp) },
+            { label: 'Tercero', name: podium.third ? playerName(podium.third) : '—' },
+          ].map(item => `
           <div class="podium-item">
             <div class="muted" style="font-size:12px;">${escapeHtml(item.label)}</div>
             <div style="font-size: 1.15rem; font-weight: 900; margin-top: 6px; line-height: 1.25;">${escapeHtml(item.name)}</div>
           </div>
         `).join('');
+        }
       }
-    }
 
-    function getPodium() {
-      if (!state.knockout) return null;
-      const size = Number(state.config.knockoutSize);
-      if (size === 4) {
-        const finalMatch = state.knockout.rounds[1]?.matches?.[0];
-        const thirdMatch = state.knockout.rounds[2]?.matches?.[0];
+      function getPodium() {
+        if (!state.knockout) return null;
+        const size = Number(state.config.knockoutSize);
+        if (size === 4) {
+          const finalMatch = state.knockout.rounds[1]?.matches?.[0];
+          const thirdMatch = state.knockout.rounds[2]?.matches?.[0];
+          if (!finalMatch?.played) return null;
+          return {
+            champion: getMatchWinner(finalMatch),
+            runnerUp: getMatchLoser(finalMatch),
+            third: thirdMatch?.played ? getMatchWinner(thirdMatch) : null,
+          };
+        }
+        const finalMatch = state.knockout.rounds[2]?.matches?.[0];
+        const thirdMatch = state.knockout.rounds[3]?.matches?.[0];
         if (!finalMatch?.played) return null;
         return {
           champion: getMatchWinner(finalMatch),
@@ -1223,193 +1267,184 @@
           third: thirdMatch?.played ? getMatchWinner(thirdMatch) : null,
         };
       }
-      const finalMatch = state.knockout.rounds[2]?.matches?.[0];
-      const thirdMatch = state.knockout.rounds[3]?.matches?.[0];
-      if (!finalMatch?.played) return null;
-      return {
-        champion: getMatchWinner(finalMatch),
-        runnerUp: getMatchLoser(finalMatch),
-        third: thirdMatch?.played ? getMatchWinner(thirdMatch) : null,
-      };
-    }
 
-    function escapeHtml(str) {
-      return String(str ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    function switchTab(tab) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
-      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
-      document.getElementById(`tab-${tab}`).classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-    });
-
-    document.getElementById('roundSelector').addEventListener('change', e => {
-      state.ui.selectedSwissRound = Number(e.target.value);
-      render();
-    });
-
-    document.getElementById('tournamentName').addEventListener('input', e => {
-      state.config.tournamentName = e.target.value || 'Torneo PES6';
-      render();
-    });
-
-    document.getElementById('swissRounds').addEventListener('change', e => {
-      state.config.swissRounds = Number(e.target.value);
-      render();
-    });
-
-    document.getElementById('knockoutSize').addEventListener('change', e => {
-      state.config.knockoutSize = Number(e.target.value);
-      state.knockout = null;
-      render();
-    });
-
-    document.getElementById('addPlayerBtn').addEventListener('click', () => {
-      const input = document.getElementById('newPlayerInput');
-      const name = input.value.trim();
-      if (!name) return;
-      state.players.push({ id: uid(), name });
-      input.value = '';
-      render();
-    });
-
-    document.getElementById('newPlayerInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('addPlayerBtn').click();
-    });
-
-    document.body.addEventListener('input', e => {
-      const playerId = e.target.dataset.playerInput;
-      if (playerId) {
-        const player = state.players.find(p => p.id === playerId);
-        if (player) player.name = e.target.value;
-        render();
-        return;
+      function escapeHtml(str) {
+        return String(str ?? '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
       }
 
-      const swiss1 = e.target.dataset.swissScore1;
-      const swiss2 = e.target.dataset.swissScore2;
-      const ko1 = e.target.dataset.koScore1;
-      const ko2 = e.target.dataset.koScore2;
+      function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+        document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+        document.getElementById(`tab-${tab}`).classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
 
-      if (swiss1 || swiss2) {
-        const [ri, id] = (swiss1 || swiss2).split('|');
-        const match = state.rounds[Number(ri)].matches.find(m => m.id === id);
-        if (match) {
-          if (swiss1) match.score1 = e.target.value;
-          if (swiss2) match.score2 = e.target.value;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+
+      document.getElementById('roundSelector').addEventListener('change', e => {
+        state.ui.selectedSwissRound = Number(e.target.value);
+        render();
+      });
+
+      document.getElementById('tournamentName').addEventListener('input', e => {
+        state.config.tournamentName = e.target.value || 'Torneo PES6';
+        render();
+      });
+
+      document.getElementById('swissRounds').addEventListener('change', e => {
+        state.config.swissRounds = Number(e.target.value);
+        render();
+      });
+
+      document.getElementById('knockoutSize').addEventListener('change', e => {
+        state.config.knockoutSize = Number(e.target.value);
+        state.knockout = null;
+        render();
+      });
+
+      document.getElementById('addPlayerBtn').addEventListener('click', () => {
+        const input = document.getElementById('newPlayerInput');
+        const name = input.value.trim();
+        if (!name) return;
+        state.players.push({ id: uid(), name });
+        input.value = '';
+        render();
+      });
+
+      document.getElementById('newPlayerInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('addPlayerBtn').click();
+      });
+
+      document.body.addEventListener('input', e => {
+        const playerId = e.target.dataset.playerInput;
+        if (playerId) {
+          const player = state.players.find(p => p.id === playerId);
+          if (player) player.name = e.target.value;
+          render();
+          return;
+        }
+
+        const swiss1 = e.target.dataset.swissScore1;
+        const swiss2 = e.target.dataset.swissScore2;
+        const ko1 = e.target.dataset.koScore1;
+        const ko2 = e.target.dataset.koScore2;
+
+        if (swiss1 || swiss2) {
+          const [ri, id] = (swiss1 || swiss2).split('|');
+          const match = state.rounds[Number(ri)].matches.find(m => m.id === id);
+          if (match) {
+            if (swiss1) match.score1 = e.target.value;
+            if (swiss2) match.score2 = e.target.value;
+            render();
+          }
+          return;
+        }
+
+        if (ko1 || ko2) {
+          const [ri, id] = (ko1 || ko2).split('|');
+          const match = state.knockout.rounds[Number(ri)].matches.find(m => m.id === id);
+          if (match) {
+            if (ko1) match.score1 = e.target.value;
+            if (ko2) match.score2 = e.target.value;
+            render();
+          }
+        }
+      });
+
+      document.body.addEventListener('change', e => {
+        const swissPlayed = e.target.dataset.swissPlayed;
+        const koPlayed = e.target.dataset.koPlayed;
+
+        if (swissPlayed) {
+          const [ri, id] = swissPlayed.split('|');
+          const match = state.rounds[Number(ri)].matches.find(m => m.id === id);
+          if (match) match.played = e.target.checked;
+          render();
+          return;
+        }
+
+        if (koPlayed) {
+          const [ri, id] = koPlayed.split('|');
+          const match = state.knockout.rounds[Number(ri)].matches.find(m => m.id === id);
+          if (match) {
+            match.played = e.target.checked;
+            advanceKnockout();
+          }
           render();
         }
-        return;
-      }
+      });
 
-      if (ko1 || ko2) {
-        const [ri, id] = (ko1 || ko2).split('|');
-        const match = state.knockout.rounds[Number(ri)].matches.find(m => m.id === id);
-        if (match) {
-          if (ko1) match.score1 = e.target.value;
-          if (ko2) match.score2 = e.target.value;
+      document.body.addEventListener('click', e => {
+        const removeId = e.target.dataset.removePlayer;
+        if (removeId) {
+          if (state.rounds.length > 0) return;
+          state.players = state.players.filter(p => p.id !== removeId);
           render();
         }
-      }
-    });
+      });
 
-    document.body.addEventListener('change', e => {
-      const swissPlayed = e.target.dataset.swissPlayed;
-      const koPlayed = e.target.dataset.koPlayed;
+      document.getElementById('nextRoundBtn').addEventListener('click', () => {
+        if (!currentRoundComplete()) return;
+        if (state.rounds.length >= Number(state.config.swissRounds)) return;
+        if (state.players.length < 4) return;
+        state.rounds.push(generateSwissPairings());
 
-      if (swissPlayed) {
-        const [ri, id] = swissPlayed.split('|');
-        const match = state.rounds[Number(ri)].matches.find(m => m.id === id);
-        if (match) match.played = e.target.checked;
+        if (!state.ui) state.ui = {};
+        state.ui.selectedSwissRound = state.rounds.length;
+
         render();
-        return;
-      }
+        switchTab('swiss');
+      });
 
-      if (koPlayed) {
-        const [ri, id] = koPlayed.split('|');
-        const match = state.knockout.rounds[Number(ri)].matches.find(m => m.id === id);
-        if (match) {
-          match.played = e.target.checked;
-          advanceKnockout();
-        }
+      document.getElementById('generateKnockoutBtn').addEventListener('click', () => {
+        if (!isSwissFinished()) return;
+        state.knockout = seedKnockout();
         render();
-      }
-    });
+        switchTab('knockout');
+      });
 
-    document.body.addEventListener('click', e => {
-      const removeId = e.target.dataset.removePlayer;
-      if (removeId) {
-        if (state.rounds.length > 0) return;
-        state.players = state.players.filter(p => p.id !== removeId);
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        const currentPlayers = state.players.map(p => ({ ...p }));
+        state = getInitialState();
+        state.players = currentPlayers.length ? currentPlayers : getInitialPlayers();
         render();
-      }
-    });
+        switchTab('config');
+      });
 
-    document.getElementById('nextRoundBtn').addEventListener('click', () => {
-      if (!currentRoundComplete()) return;
-      if (state.rounds.length >= Number(state.config.swissRounds)) return;
-      if (state.players.length < 4) return;
-      state.rounds.push(generateSwissPairings());
+      document.getElementById('exportBtn').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${(state.config.tournamentName || 'torneo_pes6').replace(/\s+/g, '_')}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
 
-      if (!state.ui) state.ui = {};
-      state.ui.selectedSwissRound = state.rounds.length;
+      document.getElementById('importInput').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            state = JSON.parse(ev.target.result);
+            render();
+          } catch {
+            alert('Archivo JSON no válido');
+          }
+        };
+        reader.readAsText(file);
+      });
 
       render();
-      switchTab('swiss');
-    });
-
-    document.getElementById('generateKnockoutBtn').addEventListener('click', () => {
-      if (!isSwissFinished()) return;
-      state.knockout = seedKnockout();
-      render();
-      switchTab('knockout');
-    });
-
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      const currentPlayers = state.players.map(p => ({ ...p }));
-      state = getInitialState();
-      state.players = currentPlayers.length ? currentPlayers : getInitialPlayers();
-      render();
-      switchTab('config');
-    });
-
-    document.getElementById('exportBtn').addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${(state.config.tournamentName || 'torneo_pes6').replace(/\s+/g, '_')}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    document.getElementById('importInput').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        try {
-          state = JSON.parse(ev.target.result);
-          render();
-        } catch {
-          alert('Archivo JSON no válido');
-        }
-      };
-      reader.readAsText(file);
-    });
-
-    render();
-  </script>
+    </script>
 </body>
 
 </html>
