@@ -538,7 +538,6 @@
           </div>
         </div>
       </div>
-      div class="card">
       <div class="section-head">
         <div>
           <h3>Ver ronda</h3>
@@ -629,20 +628,20 @@
     }
 
     function getInitialState() {
-  return {
-    ui: {
-      selectedSwissRound: 1,
-    },
-    config: {
-      tournamentName: 'Torneo PES6',
-      swissRounds: 4,
-      knockoutSize: 8,
-    },
-    players: getInitialPlayers(),
-    rounds: [],
-    knockout: null,
-  };
-}
+      return {
+        ui: {
+          selectedSwissRound: 1,
+        },
+        config: {
+          tournamentName: 'Torneo PES6',
+          swissRounds: 4,
+          knockoutSize: 8,
+        },
+        players: getInitialPlayers(),
+        rounds: [],
+        knockout: null,
+      };
+    }
 
     let state = loadState();
 
@@ -959,53 +958,53 @@
     }
 
     function renderRounds() {
-  const container = document.getElementById('roundsContainer');
-  const btn = document.getElementById('nextRoundBtn');
-  const msg = document.getElementById('nextRoundMsg');
-  const selector = document.getElementById('roundSelector');
+      const container = document.getElementById('roundsContainer');
+      const btn = document.getElementById('nextRoundBtn');
+      const msg = document.getElementById('nextRoundMsg');
+      const selector = document.getElementById('roundSelector');
 
-  const canGenerate =
-    currentRoundComplete() &&
-    state.rounds.length < Number(state.config.swissRounds) &&
-    state.players.length >= 4;
+      const canGenerate =
+        currentRoundComplete() &&
+        state.rounds.length < Number(state.config.swissRounds) &&
+        state.players.length >= 4;
 
-  btn.disabled = !canGenerate;
+      btn.disabled = !canGenerate;
 
-  if (state.rounds.length === 0)
-    msg.textContent = 'Todavía no hay rondas creadas.';
-  else if (!currentRoundComplete())
-    msg.textContent = 'Termina la ronda actual para generar la siguiente.';
-  else if (state.rounds.length >= Number(state.config.swissRounds))
-    msg.textContent = 'Ya se han creado todas las rondas.';
-  else
-    msg.textContent = 'Puedes generar la siguiente ronda.';
+      if (state.rounds.length === 0)
+        msg.textContent = 'Todavía no hay rondas creadas.';
+      else if (!currentRoundComplete())
+        msg.textContent = 'Termina la ronda actual para generar la siguiente.';
+      else if (state.rounds.length >= Number(state.config.swissRounds))
+        msg.textContent = 'Ya se han creado todas las rondas.';
+      else
+        msg.textContent = 'Puedes generar la siguiente ronda.';
 
-  // sin rondas
-  if (!state.rounds.length) {
-    selector.innerHTML = '<option>Sin rondas</option>';
-    selector.disabled = true;
-    container.innerHTML = '';
-    return;
-  }
+      // sin rondas
+      if (!state.rounds.length) {
+        selector.innerHTML = '<option>Sin rondas</option>';
+        selector.disabled = true;
+        container.innerHTML = '';
+        return;
+      }
 
-  selector.disabled = false;
+      selector.disabled = false;
 
-  if (!state.ui) state.ui = {};
-  if (!state.ui.selectedSwissRound || state.ui.selectedSwissRound > state.rounds.length) {
-    state.ui.selectedSwissRound = state.rounds.length;
-  }
+      if (!state.ui) state.ui = {};
+      if (!state.ui.selectedSwissRound || state.ui.selectedSwissRound > state.rounds.length) {
+        state.ui.selectedSwissRound = state.rounds.length;
+      }
 
-  // llenar selector
-  selector.innerHTML = state.rounds
-    .map(r => `<option value="${r.roundNumber}">Ronda ${r.roundNumber}</option>`)
-    .join('');
+      // llenar selector
+      selector.innerHTML = state.rounds
+        .map(r => `<option value="${r.roundNumber}">Ronda ${r.roundNumber}</option>`)
+        .join('');
 
-  selector.value = state.ui.selectedSwissRound;
+      selector.value = state.ui.selectedSwissRound;
 
-  const round = state.rounds.find(r => r.roundNumber == state.ui.selectedSwissRound);
-  const ri = state.rounds.indexOf(round);
+      const round = state.rounds.find(r => r.roundNumber == state.ui.selectedSwissRound);
+      const ri = state.rounds.indexOf(round);
 
-  container.innerHTML = `
+      container.innerHTML = `
     <div class="card">
       <div class="section-head">
         <h3>Ronda ${round.roundNumber}</h3>
@@ -1046,7 +1045,7 @@
       </div>
     </div>
   `;
-}
+    }
 
     function renderStandings() {
       const standings = computeStandings();
