@@ -538,86 +538,89 @@
           </div>
         </div>
       </div>
-      <div class="section-head">
-        <div>
-          <h3>Ver ronda</h3>
-          <div class="muted" style="margin-top: 6px;">
-            Muestra una sola ronda para evitar scroll infinito
+
+      <div class="card">
+        <div class="section-head">
+          <div>
+            <h3>Ver ronda</h3>
+            <div class="muted" style="margin-top: 6px;">
+              Muestra una sola ronda cada vez para evitar scroll infinito.
+            </div>
+          </div>
+          <div class="field" style="min-width: 180px; margin: 0;">
+            <select id="roundSelector"></select>
           </div>
         </div>
-        <div class="field" style="min-width: 180px; margin: 0;">
-          <select id="roundSelector"></select>
+      </div>
+
+      <div id="roundsContainer"></div>
+    </section>
+
+    <section class="tab-panel hidden" id="tab-standings">
+      <div class="card">
+        <h2>Clasificación</h2>
+        <div class="table-wrap" style="margin-top: 14px;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Jugador</th>
+                <th>Pts</th>
+                <th>PJ</th>
+                <th>G</th>
+                <th>E</th>
+                <th>P</th>
+                <th>GF</th>
+                <th>GC</th>
+                <th>DG</th>
+                <th>Buchholz</th>
+              </tr>
+            </thead>
+            <tbody id="standingsBody"></tbody>
+          </table>
         </div>
       </div>
-  </div>
+    </section>
 
-  <div id="roundsContainer"></div>
-  </section>
-
-  <section class="tab-panel hidden" id="tab-standings">
-    <div class="card">
-      <h2>Clasificación</h2>
-      <div class="table-wrap" style="margin-top: 14px;">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Jugador</th>
-              <th>Pts</th>
-              <th>PJ</th>
-              <th>G</th>
-              <th>E</th>
-              <th>P</th>
-              <th>GF</th>
-              <th>GC</th>
-              <th>DG</th>
-              <th>Buchholz</th>
-            </tr>
-          </thead>
-          <tbody id="standingsBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <section class="tab-panel hidden" id="tab-knockout">
-    <div class="card">
-      <div class="section-head">
-        <div>
-          <h2>Eliminatorias</h2>
-          <div id="knockoutMsg" class="muted" style="margin-top: 6px;"></div>
+    <section class="tab-panel hidden" id="tab-knockout">
+      <div class="card">
+        <div class="section-head">
+          <div>
+            <h2>Eliminatorias</h2>
+            <div id="knockoutMsg" class="muted" style="margin-top: 6px;"></div>
+          </div>
+          <button class="btn primary" id="generateKnockoutBtn">Generar KO</button>
         </div>
-        <button class="btn primary" id="generateKnockoutBtn">Generar KO</button>
+        <div id="knockoutContainer" style="margin-top: 16px;"></div>
       </div>
-      <div id="knockoutContainer" style="margin-top: 16px;"></div>
-    </div>
-  </section>
+    </section>
 
-  <section class="tab-panel hidden" id="tab-summary">
-    <div class="grid grid-2">
-      <div class="card">
-        <h2>Siguientes partidos</h2>
-        <div id="pendingMatches" style="margin-top: 14px;"></div>
+    <section class="tab-panel hidden" id="tab-summary">
+      <div class="grid grid-2">
+        <div class="card">
+          <h2>Siguientes partidos</h2>
+          <div id="pendingMatches" style="margin-top: 14px;"></div>
+        </div>
+        <div class="card">
+          <h2>Top actual</h2>
+          <div id="topList" style="margin-top: 14px;"></div>
+        </div>
       </div>
-      <div class="card">
-        <h2>Top actual</h2>
-        <div id="topList" style="margin-top: 14px;"></div>
+      <div class="card" id="podiumCard" style="display:none;">
+        <h2>Podio final</h2>
+        <div class="grid grid-3" id="podiumList" style="margin-top: 14px;"></div>
       </div>
-    </div>
-    <div class="card" id="podiumCard" style="display:none;">
-      <h2>Podio final</h2>
-      <div class="grid grid-3" id="podiumList" style="margin-top: 14px;"></div>
-    </div>
-  </section>
+    </section>
 
-  <div class="card footer-note">
-    Diseño mobile-first: botones grandes, navegación superior fija, tarjetas compactas y campos cómodos para usar desde
-    el móvil. Para 14 jugadores, 4 rondas suizas + Top 8 suele funcionar muy bien.
-  </div>
+    <div class="card footer-note">
+      Diseño mobile-first: botones grandes, navegación superior fija, tarjetas compactas y campos cómodos para usar
+      desde
+      el móvil. Para 14 jugadores, 4 rondas suizas + Top 8 suele funcionar muy bien.
+    </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'pes6-swiss-html-v2-mobile';
+    const STORAGE_KEY = 'pes6-swiss-html-v3-mobile';
 
     function uid() {
       return Math.random().toString(36).slice(2, 10);
@@ -958,94 +961,118 @@
     }
 
     function renderRounds() {
-      const container = document.getElementById('roundsContainer');
-      const btn = document.getElementById('nextRoundBtn');
-      const msg = document.getElementById('nextRoundMsg');
-      const selector = document.getElementById('roundSelector');
+  const container = document.getElementById('roundsContainer');
+  const btn = document.getElementById('nextRoundBtn');
+  const msg = document.getElementById('nextRoundMsg');
+  const selector = document.getElementById('roundSelector');
 
-      const canGenerate =
-        currentRoundComplete() &&
-        state.rounds.length < Number(state.config.swissRounds) &&
-        state.players.length >= 4;
+  const canGenerate =
+    currentRoundComplete() &&
+    state.rounds.length < Number(state.config.swissRounds) &&
+    state.players.length >= 4;
 
-      btn.disabled = !canGenerate;
+  btn.disabled = !canGenerate;
 
-      if (state.rounds.length === 0)
-        msg.textContent = 'Todavía no hay rondas creadas.';
-      else if (!currentRoundComplete())
-        msg.textContent = 'Termina la ronda actual para generar la siguiente.';
-      else if (state.rounds.length >= Number(state.config.swissRounds))
-        msg.textContent = 'Ya se han creado todas las rondas.';
-      else
-        msg.textContent = 'Puedes generar la siguiente ronda.';
+  if (state.rounds.length === 0) {
+    msg.textContent = 'Todavía no hay rondas creadas.';
+  } else if (!currentRoundComplete()) {
+    msg.textContent = 'Termina la ronda actual para generar la siguiente.';
+  } else if (state.rounds.length >= Number(state.config.swissRounds)) {
+    msg.textContent = 'Ya se han creado todas las rondas.';
+  } else {
+    msg.textContent = 'Puedes generar la siguiente ronda.';
+  }
 
-      // sin rondas
-      if (!state.rounds.length) {
-        selector.innerHTML = '<option>Sin rondas</option>';
-        selector.disabled = true;
-        container.innerHTML = '';
-        return;
-      }
+  if (!state.rounds.length) {
+    selector.innerHTML = '<option value="">Sin rondas</option>';
+    selector.disabled = true;
+    container.innerHTML = '';
+    return;
+  }
 
-      selector.disabled = false;
+  selector.disabled = false;
 
-      if (!state.ui) state.ui = {};
-      if (!state.ui.selectedSwissRound || state.ui.selectedSwissRound > state.rounds.length) {
-        state.ui.selectedSwissRound = state.rounds.length;
-      }
+  if (!state.ui) state.ui = {};
+  if (!state.ui.selectedSwissRound || state.ui.selectedSwissRound > state.rounds.length) {
+    state.ui.selectedSwissRound = state.rounds.length;
+  }
 
-      // llenar selector
-      selector.innerHTML = state.rounds
-        .map(r => `<option value="${r.roundNumber}">Ronda ${r.roundNumber}</option>`)
-        .join('');
+  selector.innerHTML = state.rounds
+    .map(r => `<option value="${r.roundNumber}">Ronda ${r.roundNumber}</option>`)
+    .join('');
 
-      selector.value = state.ui.selectedSwissRound;
+  selector.value = String(state.ui.selectedSwissRound);
 
-      const round = state.rounds.find(r => r.roundNumber == state.ui.selectedSwissRound);
-      const ri = state.rounds.indexOf(round);
+  const round =
+    state.rounds.find(r => r.roundNumber === Number(state.ui.selectedSwissRound)) ||
+    state.rounds[state.rounds.length - 1];
 
-      container.innerHTML = `
+  const ri = state.rounds.findIndex(r => r.roundNumber === round.roundNumber);
+
+  container.innerHTML = `
     <div class="card">
       <div class="section-head">
         <h3>Ronda ${round.roundNumber}</h3>
-        <div class="pill">
-          ${round.matches.filter(m => m.played).length}/${round.matches.length}
-        </div>
+        <div class="pill">${round.matches.filter(m => m.played).length}/${round.matches.length}</div>
       </div>
 
       <div class="grid">
         ${round.matches.map(m => m.bye ? `
           <div class="empty">
-            <strong>${playerName(m.player1Id)}</strong> descansa
+            <strong>${escapeHtml(playerName(m.player1Id))}</strong> descansa y recibe victoria automática.
           </div>
         ` : `
           <div class="match-card">
+            <div class="match-head">
+              <span>Partido</span>
+              <span>${m.played ? 'Guardado' : 'Pendiente'}</span>
+            </div>
+
             <div class="match-players">
-              <div>
-                <div class="player-name">${playerName(m.player1Id)}</div>
-                <input type="number" value="${m.score1}" data-swiss-score1="${ri}|${m.id}">
+              <div class="player-box">
+                <div class="player-name">${escapeHtml(playerName(m.player1Id))}</div>
+                <input
+                  class="score-input"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  value="${m.score1}"
+                  data-swiss-score1="${ri}|${m.id}"
+                />
               </div>
 
               <div class="vs-badge">VS</div>
 
-              <div class="right">
-                <div class="player-name">${playerName(m.player2Id)}</div>
-                <input type="number" value="${m.score2}" data-swiss-score2="${ri}|${m.id}">
+              <div class="player-box right">
+                <div class="player-name">${escapeHtml(playerName(m.player2Id))}</div>
+                <input
+                  class="score-input"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  value="${m.score2}"
+                  data-swiss-score2="${ri}|${m.id}"
+                />
               </div>
             </div>
 
             <div class="match-footer">
-              <label>
-                <input type="checkbox" data-swiss-played="${ri}|${m.id}" ${m.played ? 'checked' : ''}>
-                Jugado
+              <label class="check-inline">
+                <input
+                  type="checkbox"
+                  data-swiss-played="${ri}|${m.id}"
+                  ${m.played ? 'checked' : ''}
+                />
+                Partido jugado
               </label>
+              <span>${m.played ? 'Resultado registrado' : 'A falta de jugarse'}</span>
             </div>
           </div>
         `).join('')}
       </div>
     </div>
   `;
-    }
+}
 
     function renderStandings() {
       const standings = computeStandings();
