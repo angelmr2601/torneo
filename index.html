@@ -765,69 +765,95 @@
       }
 
       function generateSwissPairings() {
-        const standings = computeStandings();
-        let pool = [...standings];
-        const matches = [];
+  const standings = computeStandings();
+  const matches = [];
 
-        if (pool.length % 2 === 1) {
-          let byePlayer = [...pool].reverse().find(p => !p.hadBye) || pool[pool.length - 1];
-          pool = pool.filter(p => p.id !== byePlayer.id);
-          matches.push({
-            id: uid(),
-            player1Id: byePlayer.id,
-            player2Id: null,
-            score1: 1,
-            score2: 0,
-            played: true,
-            bye: true,
-          });
-        }
+  function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
 
-        const used = new Set();
-        for (let i = 0; i < pool.length; i++) {
-          const a = pool[i];
-          if (used.has(a.id)) continue;
+  function groupByPoints(list) {
+    const groups = new Map();
+    list.forEach(player => {
+      if (!groups.has(player.points)) groups.set(player.points, []);
+      groups.get(player.points).push(player);
+    });
+    return [...groups.entries()]
+      .sort((a, b) => b[0] - a[0])
+      .map(([_, players]) => shuffle(players));
+  }
 
-          let opponent = null;
-          for (let j = i + 1; j < pool.length; j++) {
-            const b = pool[j];
-            if (used.has(b.id)) continue;
-            if (!havePlayedTogether(a.id, b.id)) {
-              opponent = b;
-              break;
-            }
-          }
+  let groups = groupByPoints(standings);
 
-          if (!opponent) {
-            for (let j = i + 1; j < pool.length; j++) {
-              const b = pool[j];
-              if (!used.has(b.id)) {
-                opponent = b;
-                break;
-              }
-            }
-          }
+  // Si hay número impar, bye para el peor clasificado sin bye
+  const flatPlayers = groups.flat();
+  if (flatPlayers.length % 2 === 1) {
+    const byePlayer =
+      [...flatPlayers].reverse().find(p => !p.hadBye) ||
+      flatPlayers[flatPlayers.length - 1];
 
-          if (opponent) {
-            used.add(a.id);
-            used.add(opponent.id);
-            matches.push({
-              id: uid(),
-              player1Id: a.id,
-              player2Id: opponent.id,
-              score1: '',
-              score2: '',
-              played: false,
-              bye: false,
-            });
-          }
-        }
+    matches.push({
+      id: uid(),
+      player1Id: byePlayer.id,
+      player2Id: null,
+      score1: 1,
+      score2: 0,
+      played: true,
+      bye: true,
+    });
 
-        return {
-          roundNumber: state.rounds.length + 1,
-          matches,
-        };
+    groups = groups
+      .map(group => group.filter(p => p.id !== byePlayer.id))
+      .filter(group => group.length > 0);
+  }
+
+  // Floaters: si un grupo queda impar, baja uno al siguiente
+  for (let i = 0; i < groups.length - 1; i++) {
+    if (groups[i].length % 2 === 1) {
+      const floaterIndex = Math.floor(Math.random() * groups[i].length);
+      const [floater] = groups[i].splice(floaterIndex, 1);
+      groups[i + 1].unshift(floater);
+      groups[i + 1] = shuffle(groups[i + 1]);
+    }
+  }
+
+  // Emparejar cada grupo de forma aleatoria evitando repeticiones si es posible
+  groups.forEach(group => {
+    let pool = shuffle(group);
+
+    while (pool.length >= 2) {
+      const a = pool.shift();
+      let opponentIndex = pool.findIndex(b => !havePlayedTogether(a.id, b.id));
+
+      // Si no hay rival no repetido, coge uno aleatorio de los disponibles
+      if (opponentIndex === -1) {
+        opponentIndex = Math.floor(Math.random() * pool.length);
       }
+
+      const [b] = pool.splice(opponentIndex, 1);
+
+      matches.push({
+        id: uid(),
+        player1Id: a.id,
+        player2Id: b.id,
+        score1: '',
+        score2: '',
+        played: false,
+        bye: false,
+      });
+    }
+  });
+
+  return {
+    roundNumber: state.rounds.length + 1,
+    matches,
+  };
+}
 
       function seedKnockout() {
         const standings = computeStandings();
